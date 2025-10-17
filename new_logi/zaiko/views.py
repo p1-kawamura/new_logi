@@ -125,6 +125,34 @@ def order_item_list(ses_item_list):
     return order_list
 
 
+# モーダル_発注CSV取込
+def order_csv_check(request):
+    text=request.POST.get("text")
+    text=text.replace('"','')
+    rows=text.split("\n")
+    order_list=[]
+    for i in range(1,len(rows)-1):
+        row_list=rows[i].split(",")
+        order_list.append({"hinmei":row_list[1],"jan_code":row_list[8],"kazu":row_list[6]})
+
+    for i in order_list:
+        ins=Shouhin.objects.filter(jan_code=i["jan_code"],sys_order=1)
+        if ins.count()>1:
+            i["result"]="JAN重複"
+        elif ins.count()==0:
+            i["result"]="連動"
+        else:
+            if ins[0].available < int(i["kazu"]):
+                i["result"]="在庫"
+            else:
+                i["result"]="OK"
+                i["hontai_kazu"]="csv_" + str(ins[0].hontai_num) + "_" + str(i["kazu"])
+    
+    d={"order_csv":order_list}
+    return JsonResponse(d)
+
+
+# 依頼商品一覧から削除
 def item_del(request):
     order_num=request.POST.get("order_num")
     ses_item_list=request.session["zaiko"]["items"]

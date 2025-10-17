@@ -227,10 +227,22 @@
                         <div class="modal-header">
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
+                        <!-- body -->
                         <div class="modal-body">
-                            
+                            <div id="dropzone" style="border: 2px dashed #ccc; padding: 20px;">
+                                ここにCSVファイルをドロップしてください
+                            </div>
+                            <div id="csv_result" style="margin-top: 10px;"></div>
                         </div>
-
+                        <!-- footer -->
+                        <div class="modal-footer" style="justify-content: space-between;">
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Close">キャンセル</button>
+                            </div> 
+                            <div>
+                                <button type="button" class="btn btn-primary" id="csv_add" onclick="csv_add()">追加する</button>
+                            </div> 
+                        </div>
                     </div>
                 </div>
             </div> 
@@ -239,19 +251,12 @@
         
 
 
-        
-
-
-
-
-
-
-
-
-
-
-
     </div>
+
+
+    <script>
+        
+    </script>
 
     <!-- 各種Ajax -->
     <script>
@@ -286,6 +291,83 @@
             }
         });
 
+
+        // モーダル_発注CSV
+        const dropzone = document.getElementById('dropzone');
+
+        dropzone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropzone.style.background = '#eef';
+        });
+
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            const reader = new FileReader();
+
+            reader.readAsText(file,"Shift_JIS");
+
+            reader.onload = () => {
+                const text = reader.result;
+
+                const rows = text.split('\n').map(row => row.split(','));
+                
+                $.ajax({
+                    'url': '{% url "zaiko:order_csv_check" %}',
+                    'type': 'POST',
+                    'data': {"text":text},
+                    'dataType': 'json'
+                })
+                .done(function(response){
+                    var str="";
+                    for (var i of response.order_csv){
+                        var result="";
+                        if (i.result == "JAN重複"){
+                            result="<span style='color:red'>DBのJANが重複しています</span>";
+                        } else if (i.result == "連動"){
+                            result="<span style='color:red'>アプリと連動していません</span>"
+                        } else if (i.result == "在庫"){
+                            result="<span style='color:red'>発注可能数を超えています</span>"
+                        } else {
+                            result="<span style='color:green; font-size:1.2em' id='" + i.hontai_kazu + "' name='csv_order'>" + 
+                                "<i class='bi bi-check-circle-fill'></i></span>"
+                        }
+                        str = str + 
+                            "<tr><td>" + i.hinmei + "</td><td style='text-align: right;'>" + i.kazu +
+                                 "</td><td style='text-align: center;'>" + result + "</td></tr>"
+                    }
+                    str="<table class='table table-bordered tb_zaiko mt-4'><thead><tr class='table-secondary'>" + 
+                        "<th>品名</th><th style='text-align: center;'>数量</th>" +
+                        "<th style='text-align: center;'>結果</th></tr></thead><tbody>" + str + "</tbody></table>"
+
+                    document.getElementById("csv_result").innerHTML=str;
+                });
+            };
+        });
+
+
+        // モーダル_発注CSV_追加
+        function csv_add(){
+            var items=document.getElementsByName("csv_order");
+            var item_list=[];
+            for (var i=0 ; i<items.length ; i++){
+                item_list.push(items[i].id.replace("csv_",""));
+            };
+            console.log(item_list);
+            item_list=JSON.stringify(item_list);
+            $.ajax({
+                'url': '{% url "zaiko:item_add" %}',
+                'type': 'POST',
+                'data': {'item_list': item_list},
+                'dataType': 'json'
+            })
+            .done(function(response){
+                window.alert("商品を追加しました！");
+                document.getElementById("csv_result").innerHTML="";
+                // 商品一覧
+                order_list(response);
+            });
+        }
 
         //モーダル_品番検索
         var hinban_enter = document.getElementById("hinban_enter");
@@ -361,7 +443,7 @@
                     item_list(response);
                 });
             };
-        }
+        };
 
 
         // モーダル_品番、カラー、サイズ（値取得）
@@ -386,7 +468,7 @@
             size=JSON.stringify(size);
             var dic={"hinban":hinban,"color":color,"size":size};
             return dic
-        }
+        };
 
 
         // モーダル_カラー、サイズ共通（クリック）
@@ -422,7 +504,7 @@
                     "<td>" + i.attention + "</td></tr>"
             }
             document.getElementById("item_list").innerHTML=str;
-        }
+        };
 
 
         // モーダル_拠点選択
@@ -452,7 +534,7 @@
                     });
                 })
             }
-        }
+        };
 
 
         // モーダル_拠点リセット
@@ -472,7 +554,7 @@
                         " value='" + i + "'>" + btn_icon +  i + "</button></div>"
             }
             document.getElementById("places_btn").innerHTML=str;
-        }
+        };
 
 
         // モーダル_商品追加
@@ -499,7 +581,7 @@
                 // 商品一覧
                 order_list(response);
             });
-        }
+        };
 
 
         // 依頼商品一覧
@@ -526,7 +608,7 @@
             } else {
                 document.getElementById("order_list_nothing").innerText="";
             }
-        }
+        };
 
 
         // 商品一覧から削除
@@ -549,7 +631,7 @@
                     }
                 })
             }
-        }
+        };
 
 
         // 依頼メニューのボタン
@@ -568,7 +650,7 @@
                     }
                 }
             })
-        }
+        };
 
 
     </script>
