@@ -1,0 +1,29 @@
+.flex {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 auto;
+    justify-content: center;
+}
+.flex2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.flex3 {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+/* zaiko */
+.inlineframe {
+    background-color:#FFFFFF;
+    border: 1px solid #ced4da;
+    overflow:auto;
+    overflow-y:scroll;
+    overflow-x:hidden;
+}
+.tb_zaiko td {
+    vertical-align: middle;
+}
+

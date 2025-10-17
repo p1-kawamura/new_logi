@@ -1,0 +1,580 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'main.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <title>物流在庫表</title>
+
+</head>
+<body>
+
+    <div class="mt-3 mb-5">
+
+        <!-- メニュー -->
+        <div style="height: 50px;"></div>
+        
+        
+        <div style="margin: 0 auto; width: 1100px;">
+
+            <!-- 入力選択ボタン -->
+            <div class="flex">
+                <div>
+                    <button type="button" class="btn btn-primary" id="shouhin_manual" style="width: 320px; height: 80px;" data-bs-toggle="modal" data-bs-target="#manual_modal">
+                        <span style="font-size: 1.5em;"><i class="bi bi-cart-plus"></i></span>
+                        <span style="font-size: 1.2em; margin-left: 7px;">出荷依頼 / 在庫確認 / キープ</span>
+                    </button>
+                </div>
+                <div style="margin-left: 100px;">
+                    <button type="button" class="btn btn-success" id="shouhin_csv" style="width: 320px; height: 80px;" data-bs-toggle="modal" data-bs-target="#csv_modal">
+                        <span style="font-size: 1.5em;"><i class="bi bi-filetype-csv"></i></span>
+                        <span style="font-size: 1.2em; margin-left: 7px;">新基幹発注CSV取込</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 依頼商品一覧 -->
+            <div class="flex mt-4">
+                <table class="table table-bordered tb_zaiko">
+                    <thead>
+                        <tr class="table-secondary">
+                            <th>品番</th>
+                            <th>品名</th>
+                            <th>カラー</th>
+                            <th>サイズ</th>
+                            <th>数量</th>
+                            <th>拠点</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="order_list">
+                        {% for i in order_list %}
+                        <tr>
+                            <td>{{i.hinban}}</td>
+                            <td>{{i.hinmei}}</td>
+                            <td>{{i.color}}</td>
+                            <td>{{i.size}}</td>
+                            <td style="text-align: right;">{{i.kazu}}</td>
+                            <td>{{i.place}}</td>
+                            <td style="text-align: center;">
+                                <button type="button" class="btn btn-outline-dark btn-sm" id="{{i.order_num}}" name="order_items">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div id="order_list_nothing" style="color: #808080;">{% if order_list|length == 0 %}商品を選択してください。{% endif %}</div>
+            </div>
+
+            <!-- 依頼内容 -->
+            <div style="margin-top: 50px;">
+                <hr>
+                <!-- 翌日出荷（加工場送り） -->
+                <div>
+                    <div class="flex2">
+                        <div>
+                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_yoku_kakou" name="irai_btn">翌日出荷（加工場送り）</button>
+                        </div>
+                        <div style="font-size: 0.9em; margin-left: 10px;">
+                            通常対応用です。基本はこちらを選択して下さい。当日の入力で､翌営業日に出荷します。
+                        </div>
+                    </div>
+                    <div id="irai_yoku_kakou_form" style="display: none;">
+                        aaa
+                    </div>
+                </div>
+                <hr>
+                <!-- 翌日出荷（無地注文） -->
+                <div>
+                    <div class="flex2">
+                        <div>
+                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_yoku_muji" name="irai_btn">翌日出荷（無地注文）</button>
+                        </div>
+                        <div style="font-size: 0.9em; margin-left: 10px;">
+                            通常対応用です。基本はこちらを選択して下さい。当日の入力で､翌営業日に出荷します。
+                        </div>
+                    </div>
+                    <div id="irai_yoku_muji_form" style="display: none;">
+                        aaa
+                    </div>
+                </div>
+                <hr>
+                <!-- キープ -->
+                <div>
+                    <div class="flex2">
+                        <div>
+                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_keep" name="irai_btn">キープ</button>
+                        </div>
+                        <div style="font-size: 0.9em; margin-left: 10px;">
+                            依頼日から2週間キープとなります。
+                        </div>
+                    </div>
+                    <div id="irai_keep_form" style="display: none;">
+                        aaa
+                    </div>
+                </div>
+                <hr>
+                <!-- 当日出荷（加工場送り） -->
+                <div>
+                    <div class="flex2">
+                        <div>
+                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_tou_kakou" name="irai_btn">当日出荷（加工場送り）</button>
+                        </div>
+                        <div style="font-size: 0.9em; margin-left: 10px;">
+                            緊急対応用です。当日15時までの入力で当日出荷致します。
+                        </div>
+                    </div>
+                    <div id="irai_tou_kakou_form" style="display: none;">
+                        aaa
+                    </div>
+                </div>
+                <hr>
+                <!-- 当日出荷（無地注文） -->
+                <div>
+                    <div class="flex2">
+                        <div>
+                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_tou_muji" name="irai_btn">当日出荷（無地注文）</button>
+                        </div>
+                        <div style="font-size: 0.9em; margin-left: 10px;">
+                            緊急対応用です。当日15時までの入力で当日出荷致します。
+                        </div>
+                    </div>
+                    <div id="irai_tou_muji_form" style="display: none;">
+                        aaa
+                    </div>
+                </div>
+                <hr>
+            </div>
+
+
+
+
+
+            <!-- モーダル1　手動 -->
+            <div class="modal fade" id="manual_modal" tabindex="-1" role="dialog" aria-labelledby="modal_1" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                    <div class="modal-content">
+                        <!-- header -->
+                        <div class="modal-header">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <!-- body -->
+                        <div class="modal-body">
+                            <!-- 商品検索 -->
+                            <div class="flex2">
+                                <div>商品検索：</div>
+                                <div style="width: 520px;"><input class="form-control" type="text" id="hinban_enter"></div>
+                            </div>
+                            <div class="flex2 mt-4" style="font-size: 0.9em;">
+                                <div>
+                                    <select class="form-control" id="hinban" 
+                                        style="width: 600px; height:120px;" size="5" onclick="hinban_click()"></select>
+                                </div>
+                                <div style="margin-left: 30px;">
+                                    <select class="form-control" id="color" name="color_size"
+                                        style="width: 200px; height:120px;" onclick="color_size()" multiple></select>
+                                </div>
+                                <div style="margin-left: 30px;">
+                                    <select class="form-control" id="size" name="color_size"
+                                        style="width: 150px; height:120px;" onclick="color_size()" multiple></select>
+                                </div>
+                            </div>
+                            <!-- 拠点ボタン -->
+                            <div class="flex2" style="margin-top: 30px;" id="places_btn"></div>
+                            <!-- 商品一覧 -->
+                            <div class="inlineframe" style="margin-top: 10px; height: 350px;">
+                                <table class="table table-bordered tb_zaiko">
+                                    <thead>
+                                        <tr class="table-secondary">
+                                            <th>カラー</th>
+                                            <th>サイズ</th>
+                                            <th style="width: 100px;">数量</th>
+                                            <th style="width: 100px;">発注可能数</th>
+                                            <th style="width: 150px;">棚番</th>
+                                            <th>注意事項</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="item_list"></tbody> 
+                                </table>
+                            </div>
+                        </div>
+                        <!-- footer -->
+                        <div class="modal-footer" style="justify-content: space-between;">
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Close">キャンセル</button>
+                            </div> 
+                            <div>
+                                <button type="button" class="btn btn-primary" id="item_add" onclick="item_add()">追加する</button>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- モーダル2　CSV -->
+            <div class="modal fade" id="csv_modal" tabindex="-1" role="dialog" aria-labelledby="modal_2" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            
+                        </div>
+
+                    </div>
+                </div>
+            </div> 
+
+        </div>
+        
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+    <!-- 各種Ajax -->
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i <cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+  
+        var csrftoken = getCookie('csrftoken');
+  
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+  
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+
+        //モーダル_品番検索
+        var hinban_enter = document.getElementById("hinban_enter");
+        hinban_enter.addEventListener("input",function(){
+            document.getElementById("hinban").innerHTML="";
+            document.getElementById("color").innerHTML="";
+            document.getElementById("size").innerHTML="";
+            document.getElementById("places_btn").innerHTML="";
+            document.getElementById("item_list").innerHTML="";
+            if (hinban_enter.value == ""){
+                document.getElementById("hinban").innerHTML="";
+                return
+            };
+            $.ajax({
+                'url': '{% url "zaiko:hinban_enter" %}',
+                'type': 'POST',
+                'data': {'hinban_enter': hinban_enter.value},
+                'dataType': 'json'
+            })
+            .done(function(response){
+                var list = "";
+                if (response.hinban_list.length == 0){
+                    list='<option></option>';
+                } else {
+                    for (var i of response.hinban_list){
+                        list = list + '<option>' + i + '</option>';
+                    }
+                };
+                document.getElementById("hinban").innerHTML=list;
+                document.getElementById("color").innerHTML="";
+                document.getElementById("size").innerHTML="";
+            });
+        });
+
+
+        //モーダル_品番（品名）選択
+        function hinban_click(){
+            if (hinban.value != ""){
+                $.ajax({
+                    'url': '{% url "zaiko:hinban_click" %}',
+                    'type': 'POST',
+                    'data': {'hinban': hinban.value}, 
+                    'dataType': 'json'
+                })
+                .done(function(response){
+                    // color
+                    var color_list="";
+                    if (response.color_list.length == 0){
+                        color_list='<option></option>';
+                    } else {
+                        for (var i of response.color_list){
+                            color_list = color_list + '<option>' + i + '</option>';
+                        }
+                    };
+                    // size
+                    var size_list="";
+                    if (response.size_list.length == 0){
+                        size_list='<option></option>';
+                    } else {
+                        for (i of response.size_list){
+                            size_list = size_list + '<option>' + i + '</option>';
+                        }
+                    };
+                    // color、size
+                    document.getElementById("color").innerHTML=color_list;
+                    document.getElementById("size").innerHTML=size_list;
+
+                    // places
+                    place_reset(response);
+                    place_click()
+
+                    // 商品リスト
+                    item_list(response);
+                });
+            };
+        }
+
+
+        // モーダル_品番、カラー、サイズ（値取得）
+        function hinban_color_size(){
+            var hinban = document.getElementById("hinban").value;
+            var color=[];
+            var elm=document.getElementById("color").options;
+            for (i=0 ; i<elm.length ; i++){
+                if (elm[i].selected){
+                    color.push(elm[i].value);
+                };
+            };
+            var size=[];
+            elm=document.getElementById("size").options;
+            for (i=0 ; i<elm.length ; i++){
+                if (elm[i].selected){
+                    size.push(elm[i].value);
+                };
+            };
+
+            color=JSON.stringify(color);
+            size=JSON.stringify(size);
+            var dic={"hinban":hinban,"color":color,"size":size};
+            return dic
+        }
+
+
+        // モーダル_カラー、サイズ共通（クリック）
+        function color_size(){
+            var dic=hinban_color_size()
+            $.ajax({
+                'url': '{% url "zaiko:color_size_click" %}',
+                'type': 'POST',
+                'data': {
+                    'hinban': dic.hinban,
+                    'color':dic.color,
+                    'size':dic.size,
+                    },
+                'dataType': 'json'
+            })
+            .done(function(response){
+                item_list(response);
+            });
+        };
+
+
+        // モーダル_商品リスト
+        function item_list(response){
+            str="";
+            for (var i of response.item_list){
+                str = str + "<tr>" +
+                    "<td>" + i.color + "</td>" +
+                    "<td>" + i.size + "</td>" +
+                    "<td><input type='number' min='0' max='" + i.available + 
+                        "' class='form-control' id='hontai_" + i.hontai_num + "' name='orders' style='text-align:right;'></td>" +
+                    "<td style='text-align:right;'>" + i.available + "</td>" +
+                    "<td>" + i.tana + "</td>" +
+                    "<td>" + i.attention + "</td></tr>"
+            }
+            document.getElementById("item_list").innerHTML=str;
+        }
+
+
+        // モーダル_拠点選択
+        function place_click(){
+            var places=document.getElementsByName("pla_btn");
+            for (var i=0; i<places.length; i++){
+                places[i].addEventListener("click",function(){
+                    var dic=hinban_color_size();
+                    $.ajax({
+                        'url': '{% url "zaiko:place_click" %}',
+                        'type': 'POST',
+                        'data': {
+                            'hinban': dic.hinban,
+                            'color':dic.color,
+                            'size':dic.size,
+                            'place':this.value
+                            },
+                        'dataType': 'json'
+                    })
+                    .done(function(response){
+                        // places
+                        place_reset(response);
+                        place_click();
+
+                        // 商品リスト
+                        item_list(response);
+                    });
+                })
+            }
+        }
+
+
+        // モーダル_拠点リセット
+        function place_reset(response){
+            var str="";
+            for (i of response.place_list){
+                var btn_class="";
+                var btn_icon="";
+                if (i == response.place){
+                    btn_class="class='btn btn-dark'";
+                    btn_icon="<i class='bi bi-truck'></i> ";
+                } else {
+                    btn_class="class='btn btn-outline-dark'";
+                    btn_icon="<i class='bi bi-building'></i> ";
+                }
+                str = str + "<div style='margin-left:10px;'><button type='button' style='width:150px'" + btn_class + " name='pla_btn'" +
+                        " value='" + i + "'>" + btn_icon +  i + "</button></div>"
+            }
+            document.getElementById("places_btn").innerHTML=str;
+        }
+
+
+        // モーダル_商品追加
+        function item_add(){
+            var items=document.getElementsByName("orders");
+            var item_list=[];
+            for (var i=0 ; i<items.length ; i++){
+                if (items[i].value > 0){
+                    item_list.push(items[i].id.replace("hontai_","") + "_" + items[i].value);
+                };
+            };
+            item_list=JSON.stringify(item_list);
+            $.ajax({
+                'url': '{% url "zaiko:item_add" %}',
+                'type': 'POST',
+                'data': {'item_list': item_list},
+                'dataType': 'json'
+            })
+            .done(function(response){
+                window.alert("商品を追加しました！");
+                for (i=0 ; i<items.length ; i++){
+                    items[i].value = "";
+                };
+                // 商品一覧
+                order_list(response);
+            });
+        }
+
+
+        // 依頼商品一覧
+        function order_list(response){
+            var str="";
+            for (i of response.order_list){
+                str = str + "<tr>" +
+                    "<td>" + i.hinban + "</td>" +
+                    "<td>" + i.hinmei + "</td>" +
+                    "<td>" + i.color + "</td>" +
+                    "<td>" + i.size + "</td>" +
+                    "<td style='text-align:right;'>" + i.kazu + "</td>" +
+                    "<td>" + i.place + "</td>" +
+                    "<td style='text-align: center;'>" + 
+                        "<button type='button' class='btn btn-outline-dark btn-sm' id='" + i.order_num + "' name='order_items'>" + 
+                        "<i class='bi bi-x-lg'></i></button></td></tr>"
+            }
+            document.getElementById("order_list").innerHTML=str;
+            item_del();
+
+            // 一覧が空
+            if (response.order_list.length == 0){
+                document.getElementById("order_list_nothing").innerText="商品を選択してください。";
+            } else {
+                document.getElementById("order_list_nothing").innerText="";
+            }
+        }
+
+
+        // 商品一覧から削除
+        item_del()
+        function item_del(){
+            var items=document.getElementsByName("order_items");
+            for (var i=0; i<items.length; i++){
+                items[i].addEventListener("click",function(){
+                    var ans=confirm("この商品を依頼リストから削除しますか？");
+                    if (ans){
+                        $.ajax({
+                            'url': '{% url "zaiko:item_del" %}',
+                            'type': 'POST',
+                            'data': {'order_num': this.id},                                
+                            'dataType': 'json'
+                        })
+                        .done(function(response){
+                            order_list(response);
+                        });
+                    }
+                })
+            }
+        }
+
+
+        // 依頼メニューのボタン
+        var irai_btn=document.getElementsByName("irai_btn");
+        for (var i=0; i<irai_btn.length; i++){
+            irai_btn[i].addEventListener("click",function(){
+                for (var h=0; h<irai_btn.length; h++){
+                    var btn_id = irai_btn[h].id;
+                    if (irai_btn[h].id == this.id){
+                        document.getElementById(btn_id).className="btn btn-danger";
+                        document.getElementById(btn_id + "_form").style.display="block";
+
+                    } else {
+                        document.getElementById(btn_id).className="btn btn-outline-danger";
+                        document.getElementById(btn_id + "_form").style.display="none";
+                    }
+                }
+            })
+        }
+
+
+    </script>
+
+    <!-- モーダル用 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+
+</body>
+</html>
