@@ -36,3 +36,10 @@ class Place(models.Model):
         return self.place
     
     # show（営業に表示）　0:しない　1:表示
+
+
+class Shozoku(models.Model):
+    shozoku=models.CharField("所属",max_length=30)
+
+    def __str__(self):
+        return self.shozoku

@@ -9,9 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
     <title>物流在庫表</title>
-
 </head>
 <body>
 
@@ -39,6 +37,21 @@
                 </div>
             </div>
 
+            <!-- エラー表示 -->
+            <div id="irai_send_error" style="display: block;">
+                <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                    <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889
+                        0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 
+                        5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </symbol>
+                </svg>
+                <div class="alert alert-danger d-flex align-items-center mt-4" role="alert">
+                    <svg class="bi flex-shrink-0 me-2" width="24" height="24"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                    <div>最新の発注可能数を超えている商品が存在します！一度取り消してから、再度商品を追加してください。</div>
+                </div>
+            </div>
+
             <!-- 依頼商品一覧 -->
             <div class="flex mt-4">
                 <table class="table table-bordered tb_zaiko">
@@ -63,7 +76,7 @@
                             <td style="text-align: right;">{{i.kazu}}</td>
                             <td>{{i.place}}</td>
                             <td style="text-align: center;">
-                                <button type="button" class="btn btn-outline-dark btn-sm" id="{{i.order_num}}" name="order_items">
+                                <button type="button" class="btn btn-outline-dark btn-sm" id="{{i.order_num}}" name="order_items" zaiko="ok">
                                     <i class="bi bi-x-lg"></i>
                                 </button>
                             </td>
@@ -76,82 +89,101 @@
 
             <!-- 依頼内容 -->
             <div style="margin-top: 50px;">
-                <hr>
-                <!-- 翌日出荷（加工場送り） -->
-                <div>
-                    <div class="flex2">
-                        <div>
-                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_yoku_kakou" name="irai_btn">翌日出荷（加工場送り）</button>
-                        </div>
-                        <div style="font-size: 0.9em; margin-left: 10px;">
-                            通常対応用です。基本はこちらを選択して下さい。当日の入力で､翌営業日に出荷します。
-                        </div>
+                <!-- 依頼者 -->
+                <div class="irai_title" style="width: 100px;">担当者</div>
+                <div class="flex2 mt-3">
+                    <div>所属：</div>
+                    <div>
+                        <select class="form-select" id="shozoku">
+                            <option></option>
+                            {% for i in shozoku_list %}
+                            <option>{{i}}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div id="irai_yoku_kakou_form" style="display: none;">
-                        aaa
+                    <div style="margin-left: 50px;">担当者：</div>
+                    <div><input class="form-control" type="text" id="tantou"></div>
+                    <div class="hissu">*</div>
+                </div>
+
+                <!-- 内容 -->
+                <div class="irai_title mt-5" style="width: 100px;">依頼内容</div>
+                <div class="flex2 mt-3">
+                    <div>内容：</div>
+                    <div style="width: 230px;">
+                        <select class="form-select" id="irai_type">
+                            <option></option>
+                            <option value="yoku_kakou">翌日出荷（加工場送り）</option>
+                            <option value="yoku_muji">翌日出荷（無地注文）</option>
+                            <option value="keep">キープ</option>
+                            <option value="tou_kakou">当日出荷（加工場送り）</option>
+                            <option value="tou_muji">当日出荷（無地注文）</option>
+                        </select>
+                    </div>
+                    <div class="hissu">*</div>
+                    <div style="margin-left: 20px; background-color: #fff9c4; padding: 0.5em; width: 750px;">
+                        <span style="font-weight: bold; color: #e8ae00;"><i class="bi bi-pencil"></i> 説明：</span>
+                        <span id="irai_explain" style="font-size: 0.9em;"></span>
                     </div>
                 </div>
-                <hr>
-                <!-- 翌日出荷（無地注文） -->
-                <div>
-                    <div class="flex2">
-                        <div>
-                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_yoku_muji" name="irai_btn">翌日出荷（無地注文）</button>
-                        </div>
-                        <div style="font-size: 0.9em; margin-left: 10px;">
-                            通常対応用です。基本はこちらを選択して下さい。当日の入力で､翌営業日に出荷します。
-                        </div>
-                    </div>
-                    <div id="irai_yoku_muji_form" style="display: none;">
-                        aaa
-                    </div>
-                </div>
-                <hr>
-                <!-- キープ -->
-                <div>
-                    <div class="flex2">
-                        <div>
-                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_keep" name="irai_btn">キープ</button>
-                        </div>
-                        <div style="font-size: 0.9em; margin-left: 10px;">
-                            依頼日から2週間キープとなります。
+
+                <div class="mt-4">
+                    <!-- 翌日出荷（加工場送り） -->
+                    <div class="flex2" id="irai_yoku_kakou" name="irai_form" style="display: none;">
+                        <div>加工場：</div>
+                        <div><input class="form-control" type="text" id="yoku_kakou_kakou"></div>
+                        <div style="margin-left: 50px;">柄名：</div>
+                        <div><input class="form-control" type="text" id="yoku_kakou_gara"></div>
+                        <div style="margin-left: 50px;">出荷日指定：</div>
+                        <div style="width: 230px;">
+                            <select class="form-select" id="yoku_kakou_day">
+                                <option>翌営業日（土日祝を除く）</option>
+                                {% for i in hassou_day %}
+                                <option>{{i}}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                    <div id="irai_keep_form" style="display: none;">
-                        aaa
+                    <!-- 翌日出荷（無地注文） -->
+                    <div class="flex2" id="irai_yoku_muji" name="irai_form" style="display: none;">
+                        <div>顧客名：</div>
+                        <div><input class="form-control" type="text" id="yoku_muji_cus"></div>
+                        <div style="margin-left: 50px;">システム発送予定日：</div>
+                        <div><input class="form-control" type="date" id="yoku_muji_day"></div>
                     </div>
-                </div>
-                <hr>
-                <!-- 当日出荷（加工場送り） -->
-                <div>
-                    <div class="flex2">
-                        <div>
-                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_tou_kakou" name="irai_btn">当日出荷（加工場送り）</button>
-                        </div>
-                        <div style="font-size: 0.9em; margin-left: 10px;">
-                            緊急対応用です。当日15時までの入力で当日出荷致します。
-                        </div>
+                    <!-- キープ -->
+                    <div class="flex2" id="irai_keep" name="irai_form" style="display: none;">
+                        <div>顧客名：</div>
+                        <div><input class="form-control" type="text" id="keep_cus"></div>
                     </div>
-                    <div id="irai_tou_kakou_form" style="display: none;">
-                        aaa
+                    <!-- 当日出荷（加工場送り） -->
+                    <div class="flex2" id="irai_tou_kakou" name="irai_form" style="display: none;">
+                        <div>加工場：</div>
+                        <div><input class="form-control" type="text" id="tou_kakou_kakou"></div>
+                        <div style="margin-left: 50px;">柄名：</div>
+                        <div><input class="form-control" type="text" id="tou_kakou_gara"></div>
+                    </div>
+                    <!-- 当日出荷（無地注文） -->
+                    <div class="flex2" id="irai_tou_muji" name="irai_form" style="display: none;">
+                        <div>顧客名：</div>
+                        <div><input class="form-control" type="text" id="tou_muji_cus"></div>
                     </div>
                 </div>
-                <hr>
-                <!-- 当日出荷（無地注文） -->
-                <div>
-                    <div class="flex2">
-                        <div>
-                            <button type="button" class="btn btn-outline-danger" style="width: 200px;" id="irai_tou_muji" name="irai_btn">当日出荷（無地注文）</button>
-                        </div>
-                        <div style="font-size: 0.9em; margin-left: 10px;">
-                            緊急対応用です。当日15時までの入力で当日出荷致します。
-                        </div>
-                    </div>
-                    <div id="irai_tou_muji_form" style="display: none;">
-                        aaa
-                    </div>
+                
+                <!-- 備考 -->
+                <div class="irai_title mt-5" style="width: 150px;">備考 / 連絡事項</div>
+                <div style="font-size: 0.9em; margin-top: 5px;">※加工品と無地を物流より同送する場合は「柄名&完成予定日」をこちらに記入して下さい。</div>
+                <div class="mt-3" style="width: 500px;">
+                    <textarea class="form-control" id="irai_bikou" rows="3"></textarea>
                 </div>
-                <hr>
+                
+                <!-- 送信 -->
+                <div class="mt-5">
+                    <button type="button" class="btn btn-outline-danger" id="irai_send" style="height: 4em">
+                        <img src="{% static 'tora.gif' %}"> >> では、上記内容で依頼します！（クリックして送信）
+                    </button>
+                </div>
+
             </div>
 
 
@@ -170,8 +202,8 @@
                         <div class="modal-body">
                             <!-- 商品検索 -->
                             <div class="flex2">
-                                <div>商品検索：</div>
-                                <div style="width: 520px;"><input class="form-control" type="text" id="hinban_enter"></div>
+                                <div><i class="bi bi-search"></i> 商品検索：</div>
+                                <div style="width: 500px;"><input class="form-control" type="text" id="hinban_enter"></div>
                             </div>
                             <div class="flex2 mt-4" style="font-size: 0.9em;">
                                 <div>
@@ -212,7 +244,7 @@
                                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Close">キャンセル</button>
                             </div> 
                             <div>
-                                <button type="button" class="btn btn-primary" id="item_add" onclick="item_add()">追加する</button>
+                                <button type="button" class="btn btn-primary" id="item_add" onclick="item_add()"><i class="bi bi-plus-lg"></i> 追加する</button>
                             </div> 
                         </div>
                     </div>
@@ -229,7 +261,7 @@
                         </div>
                         <!-- body -->
                         <div class="modal-body">
-                            <div id="dropzone" style="border: 2px dashed #ccc; padding: 20px;">
+                            <div id="dropzone" style="border: 2px dashed #ccc; padding: 30px;">
                                 ここにCSVファイルをドロップしてください
                             </div>
                             <div id="csv_result" style="margin-top: 10px;"></div>
@@ -240,7 +272,7 @@
                                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Close">キャンセル</button>
                             </div> 
                             <div>
-                                <button type="button" class="btn btn-primary" id="csv_add" onclick="csv_add()">追加する</button>
+                                <button type="button" class="btn btn-primary" id="csv_add" onclick="csv_add()"><i class="bi bi-plus-lg"></i> 追加する</button>
                             </div> 
                         </div>
                     </div>
@@ -253,10 +285,6 @@
 
     </div>
 
-
-    <script>
-        
-    </script>
 
     <!-- 各種Ajax -->
     <script>
@@ -292,6 +320,7 @@
         });
 
 
+
         // モーダル_発注CSV
         const dropzone = document.getElementById('dropzone');
 
@@ -304,13 +333,9 @@
             e.preventDefault();
             const file = e.dataTransfer.files[0];
             const reader = new FileReader();
-
             reader.readAsText(file,"Shift_JIS");
-
             reader.onload = () => {
                 const text = reader.result;
-
-                const rows = text.split('\n').map(row => row.split(','));
                 
                 $.ajax({
                     'url': '{% url "zaiko:order_csv_check" %}',
@@ -353,7 +378,10 @@
             for (var i=0 ; i<items.length ; i++){
                 item_list.push(items[i].id.replace("csv_",""));
             };
-            console.log(item_list);
+            if (item_list.length == 0){
+                window.alert("追加できる商品がありません！");
+                return
+            }
             item_list=JSON.stringify(item_list);
             $.ajax({
                 'url': '{% url "zaiko:item_add" %}',
@@ -368,6 +396,7 @@
                 order_list(response);
             });
         }
+
 
         //モーダル_品番検索
         var hinban_enter = document.getElementById("hinban_enter");
@@ -494,11 +523,17 @@
         function item_list(response){
             str="";
             for (var i of response.item_list){
+                if (response.ses_list.includes(i.hontai_num.toString())){
+                    input="<span style='font-size:0.9em; color:red;'>追加済み</span>";
+                } else {
+                    input="<input type='number' min='0' max='" + i.available + 
+                        "' class='form-control' id='hontai_" + i.hontai_num + "' name='orders' style='text-align:right;'>";
+                }
+
                 str = str + "<tr>" +
                     "<td>" + i.color + "</td>" +
                     "<td>" + i.size + "</td>" +
-                    "<td><input type='number' min='0' max='" + i.available + 
-                        "' class='form-control' id='hontai_" + i.hontai_num + "' name='orders' style='text-align:right;'></td>" +
+                    "<td>" + input + "</td>" +
                     "<td style='text-align:right;'>" + i.available + "</td>" +
                     "<td>" + i.tana + "</td>" +
                     "<td>" + i.attention + "</td></tr>"
@@ -560,26 +595,42 @@
         // モーダル_商品追加
         function item_add(){
             var items=document.getElementsByName("orders");
-            var item_list=[];
+            var item_lists=[];
             for (var i=0 ; i<items.length ; i++){
-                if (items[i].value > 0){
-                    item_list.push(items[i].id.replace("hontai_","") + "_" + items[i].value);
+                if (items[i].value > Number(items[i].max)){
+                    window.alert("発注可能数を超えている商品が存在します！");
+                    return
                 };
             };
-            item_list=JSON.stringify(item_list);
+            for (i=0 ; i<items.length ; i++){
+                if (items[i].value > 0){
+                    item_lists.push(items[i].id.replace("hontai_","") + "_" + items[i].value);
+                };
+            };
+            if (item_lists.length == 0){
+                window.alert("商品 / 数量が不明です！");
+                return
+            }
+            item_lists=JSON.stringify(item_lists);
+            dic=hinban_color_size();
             $.ajax({
                 'url': '{% url "zaiko:item_add" %}',
                 'type': 'POST',
-                'data': {'item_list': item_list},
+                'data': {
+                    'item_list': item_lists,
+                    'hinban':dic.hinban,
+                    'color':dic.color,
+                    'size':dic.size
+                },
                 'dataType': 'json'
             })
             .done(function(response){
                 window.alert("商品を追加しました！");
-                for (i=0 ; i<items.length ; i++){
-                    items[i].value = "";
-                };
+                
+                // 商品リスト
+                item_list(response);  
                 // 商品一覧
-                order_list(response);
+                order_list(response);                          
             });
         };
 
@@ -596,8 +647,8 @@
                     "<td style='text-align:right;'>" + i.kazu + "</td>" +
                     "<td>" + i.place + "</td>" +
                     "<td style='text-align: center;'>" + 
-                        "<button type='button' class='btn btn-outline-dark btn-sm' id='" + i.order_num + "' name='order_items'>" + 
-                        "<i class='bi bi-x-lg'></i></button></td></tr>"
+                        "<button type='button' class='btn btn-outline-dark btn-sm' id='" + i.order_num + "' name='order_items'" +
+                        " zaiko='" + i.zaiko + "'><i class='bi bi-x-lg'></i></button></td></tr>"
             }
             document.getElementById("order_list").innerHTML=str;
             item_del();
@@ -634,23 +685,29 @@
         };
 
 
-        // 依頼メニューのボタン
-        var irai_btn=document.getElementsByName("irai_btn");
-        for (var i=0; i<irai_btn.length; i++){
-            irai_btn[i].addEventListener("click",function(){
-                for (var h=0; h<irai_btn.length; h++){
-                    var btn_id = irai_btn[h].id;
-                    if (irai_btn[h].id == this.id){
-                        document.getElementById(btn_id).className="btn btn-danger";
-                        document.getElementById(btn_id + "_form").style.display="block";
-
-                    } else {
-                        document.getElementById(btn_id).className="btn btn-outline-danger";
-                        document.getElementById(btn_id + "_form").style.display="none";
-                    }
-                }
-            })
-        };
+        // 依頼内容を選択
+        var irai_type=document.getElementById("irai_type");
+        var irai_explain=document.getElementById("irai_explain");
+        irai_type.addEventListener("change",function(){
+            // 説明
+            if (irai_type.value == ""){
+                irai_explain.innerText="";
+            } else if (irai_type.value == "yoku_kakou" || irai_type.value == "yoku_muji"){
+                irai_explain.innerText="通常対応用です。基本はこちらを選択して下さい。当日の入力で､翌営業日に出荷します。";
+            } else if (irai_type.value == "keep"){
+                irai_explain.innerText="依頼日から2週間キープとなります。";
+            } else if (irai_type.value == "tou_kakou" || irai_type.value == "tou_muji"){
+                irai_explain.innerText="緊急対応用です。当日15時までの入力で当日出荷致します。【注意】送信後、必ず出荷課までご連絡下さい。";
+            }
+            // 入力フォーム
+            var irai_form=document.getElementsByName("irai_form");
+            for (var i of irai_form){
+                i.style.display="none";
+            }
+            if (irai_type.value !=""){
+                document.getElementById("irai_" + irai_type.value).style.display="";
+            }
+        });
 
 
     </script>

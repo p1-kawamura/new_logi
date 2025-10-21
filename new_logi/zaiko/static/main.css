@@ -26,4 +26,14 @@
 .tb_zaiko td {
     vertical-align: middle;
 }
-
+.irai_title {
+    padding: 0.5em;
+    color: #333;
+    background: #ffeacf;
+    border-left: solid 5px #ffaf58;
+}
+.hissu {
+    font-size: 1.5em;
+    color: red;
+    margin-left: 5px;
+}

@@ -1,9 +1,10 @@
 from django.shortcuts import render,redirect
-from .models import Shouhin,Place
+from .models import Shouhin,Place,Shozoku
 import io
 import csv
 import json
 from django.http import JsonResponse
+from datetime import datetime,timedelta
 
 
 def index(request):
@@ -14,11 +15,31 @@ def index(request):
     if "items" not in request.session["zaiko"]:
         request.session["zaiko"]["items"]=[]
     
+    shozoku_list=Shozoku.objects.all()
     ses_item_list=request.session["zaiko"]["items"]
     order_list=order_item_list(ses_item_list)
-    params={"order_list":order_list}
+    hassou_day=[
+        "月曜日（" + next_weekday(0) + "）",
+        "水曜日（" + next_weekday(2) + "）",
+        "金曜日（" + next_weekday(4) + "）"
+    ]
 
+    params={
+        "shozoku_list":shozoku_list,
+        "order_list":order_list,
+        "hassou_day":hassou_day,
+        }
     return render(request,"zaiko/index.html",params)
+
+
+# FUNC 翌曜日取得
+def next_weekday(target):
+    today = datetime.today()
+    days_ahead = (target - today.weekday() + 7) % 7
+    if days_ahead == 0:
+        days_ahead = 7  # 今日が対象曜日なら次週を取得
+    next_day = today + timedelta(days=days_ahead)
+    return next_day.date().strftime("%m/%d")
 
 
 #モーダル_品番検索に入力
@@ -38,11 +59,14 @@ def hinban_click(request):
     place_list=list(Shouhin.objects.filter(shouhin_set=hinban,place__in=place_ok).values_list("place",flat=True).distinct())
     place="物流センター"
     request.session["zaiko"]["place"]="物流センター"
+    ses_item_list=request.session["zaiko"]["items"]
+
     d={"color_list":color_list,
        "size_list":size_list,
        "item_list":item_list(hinban,[],[],place),
        "place_list":place_list,
        "place":place,
+       "ses_list":ses_list(ses_item_list)
        }
     return JsonResponse(d)
 
@@ -55,11 +79,16 @@ def color_size_click(request):
     size=request.POST.get("size")
     size=json.loads(size)
     place=request.session["zaiko"]["place"]
-    d={"item_list":item_list(hinban,color,size,place)}
+    ses_item_list=request.session["zaiko"]["items"]
+    print(item_list(hinban,color,size,place))
+    d={
+        "item_list":item_list(hinban,color,size,place),
+        "ses_list":ses_list(ses_item_list)
+        }
     return JsonResponse(d)
 
 
-# FUNC　商品リスト取得
+# FUNC 商品リスト取得
 def item_list(hinban,color,size,place):
     if len(color)==0 and len(size)==0:
         item_list=list(Shouhin.objects.filter(shouhin_set=hinban,place=place).values().order_by("color","size_num"))
@@ -70,7 +99,16 @@ def item_list(hinban,color,size,place):
             item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,place=place).values().order_by("color","size_num"))
         else:
             item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,size__in=size,place=place).values().order_by("color","size_num"))
+
     return item_list
+
+
+# FUNC 追加済み商品取得
+def ses_list(ses_item_list):
+    ses_list=[]
+    for i in ses_item_list:
+        ses_list.append(i.split("_")[0])
+    return ses_list
 
 
 # モーダル_拠点選択
@@ -84,25 +122,39 @@ def place_click(request):
     request.session["zaiko"]["place"]=place
     place_ok=list(Place.objects.filter(show=1))
     place_list=list(Shouhin.objects.filter(shouhin_set=hinban,place__in=place_ok).values_list("place",flat=True).distinct())
+    ses_item_list=request.session["zaiko"]["items"]
     d={
         "item_list":item_list(hinban,color,size,place),
         "place_list":place_list,
         "place":place,
+        "ses_list":ses_list(ses_item_list)
         }
     return JsonResponse(d)
 
 
 # モーダル_商品追加
 def item_add(request):
-    item_list=request.POST.get("item_list")
-    item_list=json.loads(item_list)
+    item_lists=request.POST.get("item_list")
+    item_lists=json.loads(item_lists)
+    hinban=request.POST.get("hinban")
+    color=request.POST.get("color")
+    color=json.loads(color)
+    size=request.POST.get("size")
+    size=json.loads(size)
     ses_item_list=request.session["zaiko"]["items"]
-    for i in item_list:
+    place=request.session["zaiko"]["place"]
+
+    # print(hinban,color,size,place)
+
+    for i in item_lists:
         ses_item_list.append(i)
     request.session["zaiko"]["items"]=ses_item_list
-    order_list=order_item_list(ses_item_list)
 
-    d={"order_list":order_list}
+    d={
+        "order_list":order_item_list(ses_item_list),
+        "ses_list":ses_list(ses_item_list),
+        "item_list":item_list(hinban,color,size,place)
+        }
     return JsonResponse(d)
 
 
@@ -112,6 +164,10 @@ def order_item_list(ses_item_list):
     for i,h in enumerate(ses_item_list):
         hontai,kazu=map(int,h.split("_"))
         ins=Shouhin.objects.get(hontai_num=hontai)
+        if kazu >= ins.available:
+            zaiko="ok"
+        else:
+            zaiko="ng"
         dic={
             "hinban":ins.shouhin_num,
             "hinmei":ins.shouhin_name,
@@ -120,6 +176,7 @@ def order_item_list(ses_item_list):
             "kazu":kazu,
             "place":ins.place,
             "order_num":"order_" + str(i),
+            "zaiko":zaiko,
         }
         order_list.append(dic)
     return order_list
