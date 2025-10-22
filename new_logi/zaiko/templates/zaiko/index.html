@@ -350,20 +350,22 @@
                         if (i.result == "JAN重複"){
                             result="<span style='color:red'>DBのJANが重複しています</span>";
                         } else if (i.result == "連動"){
-                            result="<span style='color:red'>アプリと連動していません</span>"
+                            result="<span style='color:red'>アプリと連動していません</span>";
                         } else if (i.result == "在庫"){
-                            result="<span style='color:red'>発注可能数を超えています</span>"
+                            result="<span style='color:red'>発注可能数を超えています</span>";
+                        } else if (i.result == "リスト"){
+                            result="<span style='color:red'>発注リストに追加済みです</span>";
                         } else {
                             result="<span style='color:green; font-size:1.2em' id='" + i.hontai_kazu + "' name='csv_order'>" + 
-                                "<i class='bi bi-check-circle-fill'></i></span>"
+                                "<i class='bi bi-check-circle-fill'></i></span>";
                         }
                         str = str + 
                             "<tr><td>" + i.hinmei + "</td><td style='text-align: right;'>" + i.kazu +
-                                 "</td><td style='text-align: center;'>" + result + "</td></tr>"
+                                 "</td><td style='text-align: center;'>" + result + "</td></tr>";
                     }
                     str="<table class='table table-bordered tb_zaiko mt-4'><thead><tr class='table-secondary'>" + 
                         "<th>品名</th><th style='text-align: center;'>数量</th>" +
-                        "<th style='text-align: center;'>結果</th></tr></thead><tbody>" + str + "</tbody></table>"
+                        "<th style='text-align: center;'>結果</th></tr></thead><tbody>" + str + "</tbody></table>";
 
                     document.getElementById("csv_result").innerHTML=str;
                 });
@@ -384,7 +386,7 @@
             }
             item_list=JSON.stringify(item_list);
             $.ajax({
-                'url': '{% url "zaiko:item_add" %}',
+                'url': '{% url "zaiko:csv_item_add" %}',
                 'type': 'POST',
                 'data': {'item_list': item_list},
                 'dataType': 'json'

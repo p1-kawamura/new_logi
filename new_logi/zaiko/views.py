@@ -144,8 +144,6 @@ def item_add(request):
     ses_item_list=request.session["zaiko"]["items"]
     place=request.session["zaiko"]["place"]
 
-    # print(hinban,color,size,place)
-
     for i in item_lists:
         ses_item_list.append(i)
     request.session["zaiko"]["items"]=ses_item_list
@@ -182,7 +180,7 @@ def order_item_list(ses_item_list):
     return order_list
 
 
-# モーダル_発注CSV取込
+# モーダル_発注CSV_取込
 def order_csv_check(request):
     text=request.POST.get("text")
     text=text.replace('"','')
@@ -199,13 +197,31 @@ def order_csv_check(request):
         elif ins.count()==0:
             i["result"]="連動"
         else:
-            if ins[0].available < int(i["kazu"]):
+            ses_item_list=request.session["zaiko"]["items"]
+            ses_lists=ses_list(ses_item_list)
+            if str(ins[0].hontai_num) in ses_lists:
+                i["result"]="リスト"
+            elif ins[0].available < int(i["kazu"]):
                 i["result"]="在庫"
             else:
                 i["result"]="OK"
                 i["hontai_kazu"]="csv_" + str(ins[0].hontai_num) + "_" + str(i["kazu"])
     
     d={"order_csv":order_list}
+    return JsonResponse(d)
+
+
+# モーダル_発注CSV_商品追加
+def csv_item_add(request):
+    item_lists=request.POST.get("item_list")
+    item_lists=json.loads(item_lists)
+    ses_item_list=request.session["zaiko"]["items"]
+
+    for i in item_lists:
+        ses_item_list.append(i)
+    request.session["zaiko"]["items"]=ses_item_list
+
+    d={"order_list":order_item_list(ses_item_list)}
     return JsonResponse(d)
 
 

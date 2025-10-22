@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import index,hinban_enter,hinban_click,color_size_click,place_click,item_add,item_del,order_item_list,order_csv_check, \
+from .views import index,hinban_enter,hinban_click,color_size_click,place_click,item_add,item_del,order_item_list,order_csv_check,csv_item_add, \
                     csv_imp,csv_imp_page,free
 
 
@@ -15,6 +15,7 @@ urlpatterns = [
     path('item_del/', item_del, name="item_del"),
     path('order_item_list/', order_item_list, name="order_item_list"),
     path('order_csv_check/', order_csv_check, name="order_csv_check"),
+    path('csv_item_add/', csv_item_add, name="csv_item_add"),
 
     path('csv_imp/', csv_imp, name="csv_imp"),
     path('csv_imp_page/', csv_imp_page, name="csv_imp_page"),
