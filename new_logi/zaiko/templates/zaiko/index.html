@@ -229,7 +229,7 @@
                             <div class="flex2" style="margin-top: 30px;" id="places_btn"></div>
                             <!-- 商品一覧 -->
                             <div class="inlineframe" style="margin-top: 10px; height: 350px;">
-                                <table class="table table-bordered tb_zaiko">
+                                <table class="table table-bordered tb_zaiko sticky_table">
                                     <thead>
                                         <tr class="table-secondary">
                                             <th>カラー</th>
@@ -537,14 +537,15 @@
                     input="<input type='number' min='0' max='" + i.available + 
                         "' class='form-control' id='hontai_" + i.hontai_num + "' name='orders' style='text-align:right;'>";
                 }
-
+                var attention="";
+                if (i.attention){attention = i.attention};
                 str = str + "<tr>" +
                     "<td>" + i.color + "</td>" +
                     "<td>" + i.size + "</td>" +
                     "<td>" + input + "</td>" +
                     "<td style='text-align:right;'>" + i.available + "</td>" +
                     "<td>" + i.tana + "</td>" +
-                    "<td>" + i.attention + "</td></tr>"
+                    "<td>" + attention + "</td></tr>"
             }
             document.getElementById("item_list").innerHTML=str;
         };

@@ -43,3 +43,11 @@ class Shozoku(models.Model):
 
     def __str__(self):
         return self.shozoku
+    
+
+class Size(models.Model):
+    size_num=models.IntegerField("順番",null=False)
+    size=models.CharField("サイズ",max_length=255,blank=True)
+
+    def __str__(self):
+        return self.size
