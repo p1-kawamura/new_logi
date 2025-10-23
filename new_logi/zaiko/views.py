@@ -18,6 +18,11 @@ def index(request):
     shozoku_list=Shozoku.objects.all()
     ses_item_list=request.session["zaiko"]["items"]
     order_list=order_item_list(ses_item_list)
+    alert=0
+    for i in order_list:
+        if i["zaiko"]=="ng":
+            alert += 1
+
     hassou_day=[
         "月曜日（" + next_weekday(0) + "）",
         "水曜日（" + next_weekday(2) + "）",
@@ -27,6 +32,7 @@ def index(request):
     params={
         "shozoku_list":shozoku_list,
         "order_list":order_list,
+        "alert":alert,
         "hassou_day":hassou_day,
         }
     return render(request,"zaiko/index.html",params)
@@ -80,7 +86,6 @@ def color_size_click(request):
     size=json.loads(size)
     place=request.session["zaiko"]["place"]
     ses_item_list=request.session["zaiko"]["items"]
-    print(item_list(hinban,color,size,place))
     d={
         "item_list":item_list(hinban,color,size,place),
         "ses_list":ses_list(ses_item_list)
@@ -159,21 +164,21 @@ def item_add(request):
 # FUNC 依頼リスト
 def order_item_list(ses_item_list):
     order_list=[]
-    for i,h in enumerate(ses_item_list):
-        hontai,kazu=map(int,h.split("_"))
+    for i in ses_item_list:
+        hontai,kazu=map(int,i.split("_"))
         ins=Shouhin.objects.get(hontai_num=hontai)
-        if kazu >= ins.available:
-            zaiko="ok"
-        else:
+        if kazu > ins.available:
             zaiko="ng"
+        else:
+            zaiko="ok"
         dic={
             "hinban":ins.shouhin_num,
             "hinmei":ins.shouhin_name,
             "color":ins.color,
             "size":ins.size,
             "kazu":kazu,
+            "hontai_kazu":"order_" + i,
             "place":ins.place,
-            "order_num":"order_" + str(i),
             "zaiko":zaiko,
         }
         order_list.append(dic)
@@ -227,9 +232,9 @@ def csv_item_add(request):
 
 # 依頼商品一覧から削除
 def item_del(request):
-    order_num=request.POST.get("order_num")
+    hontai_kazu=request.POST.get("hontai_kazu").replace("order_","")
     ses_item_list=request.session["zaiko"]["items"]
-    del ses_item_list[int(order_num.replace("order_",""))]
+    ses_item_list.remove(hontai_kazu)
     request.session["zaiko"]["items"]=ses_item_list
     order_list=order_item_list(ses_item_list)
 
@@ -237,8 +242,33 @@ def item_del(request):
     return JsonResponse(d)
 
 
+# 依頼送信_最終確認
+def irai_send_check(request):
+    ses_item_list=request.session["zaiko"]["items"]
+    order_list=order_item_list(ses_item_list)
+    alert=0
+    for i in order_list:
+        if i["zaiko"]=="ng":
+            alert += 1
+
+    d={"order_list":order_list,"alert":alert}
+    return JsonResponse(d)
 
 
+# 依頼送信_成功
+def irai_send_ok(request):
+    shozoku=request.POST.get("shozoku")
+    tantou=request.POST.get("tantou")
+    irai_type=request.POST.get("irai_type")
+    form_dic=request.POST.get("form_dic")
+    form_dic=json.loads(form_dic)
+    bikou=request.POST.get("bikou")
+    ses_item_list=request.session["zaiko"]["items"]
+
+    print(shozoku,tantou,irai_type,form_dic,bikou)
+
+    d={}
+    return JsonResponse(d)
 
 
 

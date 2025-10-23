@@ -16,6 +16,12 @@
 }
 
 /* zaiko */
+.main_btn {
+    width: 320px; 
+    height: 80px; 
+    border-width: 2px !important; 
+    font-weight: bold !important;
+}
 .inlineframe {
     background-color:#FFFFFF;
     border: 1px solid #ced4da;
@@ -28,12 +34,9 @@
 }
 .irai_title {
     padding: 0.5em;
-    color: #333;
-    background: #ffeacf;
-    border-left: solid 5px #ffaf58;
+    background: #e2e3e5;
+    border-left: solid 5px #808080;
 }
 .hissu {
-    font-size: 1.5em;
-    color: red;
-    margin-left: 5px;
+    border-color: #ff0000 !important;
 }

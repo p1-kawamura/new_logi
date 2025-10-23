@@ -6,6 +6,8 @@ from django.contrib.admin import ModelAdmin
 class A_shouhin(ModelAdmin):
     model=Shouhin
     list_display=["hontai_num","place","shouhin_num","shouhin_name","color","size","stock"]
+    search_fields=["shouhin_set"]
+    ordering=["shouhin_num","color","size_num"]
 
 class A_place(ModelAdmin):
     model=Place
@@ -13,7 +15,7 @@ class A_place(ModelAdmin):
 
 class A_shozoku(ModelAdmin):
     model=Shozoku
-    list_display=["shozoku"]
+    list_display=["id","shozoku"]
 
 
 admin.site.register(Shouhin,A_shouhin)
