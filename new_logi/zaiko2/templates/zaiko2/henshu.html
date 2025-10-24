@@ -17,165 +17,50 @@
 <body>
     <div class="mt-3 mb-5">
 
-        <!-- メニュー -->
-        <div class="flex3" style="margin: 0 auto; width: 1000px;">
-            <div>
-                <a href="https://www.p1-intl.com/" target="_blank"><img src="{% static 'logo.png' %}"></a>
-            </div>
-            <div style="margin-left: 30px;">
-                <a href="{% url 'sample:index' %}"><button type="button" class="btn btn-outline-dark">サンプル在庫表</button></a>
-            </div>
-            <div style="margin-left: 30px;">
-                <a href="{% url 'sample:henshu_index' %}"><button type="button" class="btn btn-dark">サンプル登録 / 編集</button></a>
-            </div>
-            <div style="margin-left: 30px;">
-                <a href="{% url 'sample:size_index' %}"><button type="button" class="btn btn-outline-dark">サイズ編集</button></a>
-            </div>
-        </div>
-        <hr>
+        <div style="margin: 0 auto; width: 1100px;">
 
-
-        <!-- 商品検索 -->
-        <div style="margin: 0 auto; width: 1000px;">
-            <div class="flex2 mt-5">
-                <div>
-                    <div class="flex3">
-                        <div>対象店舗：</div>
-                        <div>
-                            <select class="form-control form-select" id="team_select">
-                                {% for i in team_list %}
-                                    {% if i == team %}
-                                    <option value="{{i}}" selected>{{i}}</option>
-                                    {% else %}
-                                    <option value="{{i}}">{{i}}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div style="margin-left: 30px;">
-                    <div class="flex3">
-                        <div>品番検索：</div>
-                        <div style="width: 150px;"><input class="form-control" type="text" id="hinban_enter"></div>
-                    </div>
-                </div>
-                <div style="margin-left: 30px;">
-                    <select class="form-control" id="hinban" style="width: 200px; height:100px;" size="5"></select>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 商品リスト -->
-        <div class="mt-5 inlineframe" id="item_list" style="margin: 0 auto; width: 1000px; height: 200px;">
-            <div id="item"></div>
-        </div>
-        
-        <!-- 登録/編集 -->
-        <div class="mt-5" style="margin: 0 auto; width: 1000px;">
+            <!-- メニュー -->
             <div class="flex2">
-                <div id="up_hontai_num" style="display: none;"></div>
-                <div id="ses_team" style="display: none;">{{team}}</div>
-                <div><button type="button" class="btn btn-secondary" id="detail_copy">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
-                    </svg> 内容をコピーする
-                </button></div>
-                <div style="margin-left: 30px;"><button type="button" class="btn btn-outline-dark" id="detail_clear">クリア</button></div>
+                <div><a href="{% url 'zaiko:index' %}">出荷依頼</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
             </div>
-            <div class="mt-4 flex2">
-                <div>
-                    <div>店舗 <span style="color: red;">*</span></div>
-                    <div>
-                        <select class="form-control form-select" id="up_team">
-                            {% for i in team_list %}
-                                {% if i == team %}
-                                <option value="{{i}}" selected>{{i}}</option>
-                                {% else %}
-                                <option value="{{i}}">{{i}}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div style="margin-left: 30px;">
-                    <div>商品番号 <span style="color: red;">*</span></div>
-                    <div><input class="form-control" type="text" id="up_shouhin_num" style="width: 150px;"></div>
-                </div>
-                <div style="margin-left: 30px;">
-                    <div>カラー</div>
-                    <div><input class="form-control" type="text" id="up_color" style="width: 220px;"></div>  
-                </div>
-                <div style="margin-left: 30px;">
-                    <div>サイズ <span style="color: red;">*</span></div>
-                    <div>
-                        <select class="form-select" id="up_size">
-                            <option value=""></option>
-                            {% for i in size_list %}
-                            <option value="{{i.size}}">{{i.size}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div style="margin-left: 30px;">
-                    <div>棚番</div>
-                    <div>
-                        <input list="size_list" class="form-control" type="text" id="up_tana" style="width: 270px;">
-                        <datalist id="size_list">
-                            {% for tana in tana_list %}
-                            <option value="{{tana}}">
-                            {% endfor %}
-                        </datalist>
-                    </div>
-                </div>
+            <hr>
+
+        
+
+            <!-- 商品検索 -->
+            <div class="flex2">
+                <div><i class="bi bi-search"></i> 商品検索：</div>
+                <div style="width: 500px;"><input class="form-control" type="text" id="hinban_enter"></div>
             </div>
-            <div class="mt-2 flex2">
-                <div>
-                    <div class="mt-3 flex2">
-                        <div>
-                            <div>商品名 <span style="color: red;">*</span></div>
-                            <div><input class="form-control" type="text" id="up_shouhin_name" style="width: 510px;"></div>
-                        </div>
-                        <div style="margin-left: 30px;">
-                            <div>状態</div>
-                            <div>
-                                <select class="form-select" id="up_joutai">
-                                    <option value="0">あり</option>
-                                    <option value="1">貸出中</option>
-                                    <option value="2">廃番</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex2">
-                        <div>
-                            <div>貸出日</div>
-                            <div><input class="form-control" type="date" id="up_rental_day" style="width: 150px;"></div>
-                        </div>
-                        <div style="margin-left: 30px;">
-                            <div>担当者</div>
-                            <div><input class="form-control" type="text" id="up_rental_tantou" style="width: 170px;"></div>  
-                        </div>
-                        <div style="margin-left: 30px;">
-                            <div>顧客名</div>
-                            <div><input class="form-control" type="text" id="up_rental_cus" style="width: 260px;"></div>  
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-3" style="margin-left: 30px;">
-                    <div>
-                        <div>備考</div>
-                        <div>
-                            <textarea class="form-control" id="up_bikou" rows="4" style="width: 330px;"></textarea>
-                        </div>
-                    </div>
-                </div>
+            <div class="mt-3">
+                <select class="form-control" id="hinban" style="width: 600px; height:120px;" size="5"></select>
             </div>
-            <div class="mt-4 flex3" style="justify-content: space-between;">
-                <div><button type="button" class="btn btn-outline-danger" id="btn_del"><i class='bi bi-x-lg'></i> 登録削除</button></div>
-                <div><button type="button" class="btn btn-primary" id="up_btn"><i class="bi bi-plus-lg"></i> 新規登録</button></div>
+                
+            <!-- 商品一覧 -->
+            <div class="inlineframe mt-3" style="height: 350px; width: 100%;">
+                <table class="table table-bordered tb_zaiko sticky_table" style="font-size: 0.9em;">
+                    <thead>
+                        <tr class="table-secondary">
+                            <th>カラー</th>
+                            <th>サイズ</th>
+                            <th style="width: 80px;">キープ数</th>
+                            <th style="width: 80px;">在庫数</th>
+                            <th>棚番</th>
+                            <th>拠点</th>
+                            <th>備考</th>
+                            <th>注意事項</th>
+                        </tr>
+                    </thead>
+                    <tbody id="item_list"></tbody> 
+                </table>
             </div>
+            
+            
+
         </div>
+        
 
     </div>
 
@@ -216,7 +101,7 @@
         });
   
 
-
+        
         //品番検索
         var hinban_enter = document.getElementById("hinban_enter");
         hinban_enter.addEventListener("input",function(){
@@ -227,7 +112,7 @@
                 return
             };
             $.ajax({
-                'url': '{% url "zaiko2:hinban_enter" %}',
+                'url': '{% url "zaiko2:henshu_hinban_enter" %}',
                 'type': 'POST',
                 'data': {
                     'hinban_enter': hinban_enter.value,
@@ -381,30 +266,6 @@
             tana();
         };
 
-
-        // 店舗選択_棚番
-        document.getElementById("up_team").addEventListener("change",function(){
-            tana();
-        })
-
-        // 棚番リスト
-        function tana(){
-            team=document.getElementById("up_team").value;
-            $.ajax({
-                'url': '{% url "zaiko2:henshu_team_tana" %}',
-                'type': 'POST',
-                'data': {'team': document.getElementById("up_team").value},
-                'dataType': 'json'
-            })
-            .done(function(response){
-                res=response.tana_list;
-                var str ="";
-                for (var i of res){
-                    str= str + "<option value='" + i + "'>"
-                }
-                document.getElementById("size_list").innerHTML=str;
-            });
-        }
 
         // 登録・更新
         document.getElementById("up_btn").addEventListener("click",function(){

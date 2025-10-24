@@ -57,3 +57,70 @@
 .hissu {
     border-color: #ff0000 !important;
 }
+
+/* zaiko2 */
+
+/* 編集画面 */
+.main_henshu {
+    border-bottom: solid 0.5px #333333;
+    padding: 10px 10px;
+    font-size: 0.9em;
+    width: 1000px;
+}
+.main_henshu:hover {
+    background-color: #ff6;
+    cursor: pointer;
+}
+.shouhin_name {
+    position: relative;
+    padding: 0.5rem 1rem calc(1rem + 10px);
+    background: #ff6;
+}
+.shouhin_name:before {
+    position: absolute;
+    top: -7px;
+    left: -7px;
+    width: 100%;
+    height: 100%;
+    content: '';
+    border: 2px solid #797900;
+}
+.rental_icon {
+    padding: 5px 10px;
+    color: #fff;
+    background-color: #646565;
+    width: 70px;
+    text-align: center;
+    cursor: pointer;
+}
+.haiban_icon {
+    padding: 5px 10px;
+    color: #fff;
+    background-color: #800080;
+    width: 70px;
+    text-align: center;
+}
+.tana_icon{
+    padding: 0.3em 0.5em;
+    border: solid 0.5px #646565;
+}
+
+/* サイズ編集 */
+.drag-list li {
+    line-height:3em;
+    border:1px solid #cccccc;
+    cursor:pointer;
+    padding-left: 10px;
+}
+.inlineframe3 {
+    background-color:#FFFFFF;
+    overflow:auto;
+    overflow-y:scroll;
+    overflow-x:hidden;
+}
+.main_size {
+    border-bottom: solid 0.5px #333333;
+    padding: 10px 10px;
+    font-size: 0.8em;
+    width: 600px;
+}

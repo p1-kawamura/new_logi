@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
-from zaiko.models import Shouhin,Size
+from zaiko.models import Shouhin,Size,Place
 import datetime
 from django.http import JsonResponse
 import io
@@ -10,18 +10,25 @@ import json
 
 # 編集画面
 def henshu_index(request):
-    team=request.session["team"]
-    team_list=["","東京","大阪","高松","福岡"]
+    place_list=Place.objects.all()
     size_list=Size.objects.all()
-    if team !="":
-        tana_list=list(Shouhin.objects.filter(team=team).values_list("tana",flat=True).order_by("tana").distinct())
     params={
-        "team":team,
-        "team_list":team_list,
         "size_list":size_list,
-        "tana_list":tana_list,
+        "place_list":place_list,
     }
-    return render(request,"sample/henshu.html",params)
+    return render(request,"zaiko2/henshu.html",params)
+
+
+# 品番検索に入力
+def henshu_hinban_enter(request):
+    team=request.POST.get("team")
+    hinban_enter=request.POST.get("hinban_enter")
+    if team=="全店舗":
+        hinban_list=list(Shouhin.objects.filter(shouhin_num__icontains=hinban_enter).values_list("shouhin_num",flat=True).order_by("shouhin_num").distinct())
+    else:
+        hinban_list=list(Shouhin.objects.filter(team=team,shouhin_num__icontains=hinban_enter).values_list("shouhin_num",flat=True).order_by("shouhin_num").distinct())
+    d={"hinban_list":hinban_list}
+    return JsonResponse(d)
 
 
 # 編集_品番クリック
@@ -38,15 +45,6 @@ def henshu_list_click(request):
     hontai_num=request.POST.get("hontai_num")
     item=list(Shouhin.objects.filter(hontai_num=hontai_num).values())[0]
     d={"item":item}
-    return JsonResponse(d)
-
-
-# 編集_店舗クリック_棚番
-def henshu_team_tana(request):
-    team=request.POST.get("team")
-    tana_list=[]
-    tana_list=list(Shouhin.objects.filter(team=team).values_list("tana",flat=True).order_by("tana").distinct())
-    d={"tana_list":tana_list}
     return JsonResponse(d)
 
 
@@ -104,7 +102,7 @@ def henshu_del(request):
 # サイズ画面
 def size_index(request):
     sizes=Size.objects.all().order_by("size_num")
-    return render(request,"sample/size.html",{"sizes":sizes})
+    return render(request,"zaiko2/size.html",{"sizes":sizes})
 
 
 # サイズ番号（順番）
@@ -177,10 +175,10 @@ def size_del(request):
     return JsonResponse(d)
 
 
-# 同サイズ使用サンプル
-def size_sample(request):
+# 同サイズ使用商品
+def size_same(request):
     size_name=request.POST.get("size_name")
-    size_sample=list(Shouhin.objects.filter(size=size_name).values())
-    d={"size_sample":size_sample}
+    size_same_list=list(Shouhin.objects.filter(size=size_name).values())
+    d={"size_same_list":size_same_list}
     return JsonResponse(d)
 

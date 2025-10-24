@@ -15,14 +15,22 @@
 
     <div class="mt-3 mb-5">
 
-        <!-- メニュー -->
-        <div style="height: 50px;"></div>
-        
-        
         <div style="margin: 0 auto; width: 1100px;">
 
+            <!-- メニュー -->
+            <div class="flex2">
+                <div><a href="{% url 'zaiko:index' %}">出荷依頼</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko:download_excel_1' %}">出荷作業依頼書</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko:download_excel_2' %}">資材・カタログ出荷依頼</a></div>
+            </div>
+            <hr>
+        
+        
+
             <!-- 入力選択ボタン -->
-            <div class="flex">
+            <div class="flex mt-5">
                 <div>
                     <button type="button" class="btn btn-outline-primary main_btn" id="shouhin_manual" data-bs-toggle="modal" data-bs-target="#manual_modal">
                         <span style="font-size: 1.5em;"><i class="bi bi-cart-plus"></i></span>
@@ -236,7 +244,6 @@
                                             <th>サイズ</th>
                                             <th style="width: 100px;">数量</th>
                                             <th style="width: 100px;">発注可能数</th>
-                                            <th style="width: 150px;">棚番</th>
                                             <th>注意事項</th>
                                         </tr>
                                     </thead>
@@ -544,7 +551,6 @@
                     "<td>" + i.size + "</td>" +
                     "<td>" + input + "</td>" +
                     "<td style='text-align:right;'>" + i.available + "</td>" +
-                    "<td>" + i.tana + "</td>" +
                     "<td>" + attention + "</td></tr>"
             }
             document.getElementById("item_list").innerHTML=str;

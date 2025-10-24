@@ -15,27 +15,20 @@
 <body>
     <div class="mt-3 mb-5">
 
+        <div style="margin: 0 auto; width: 1100px;">
+
         <!-- メニュー -->
-        <div class="flex3" style="margin: 0 auto; width: 1000px;">
-            <div>
-                <a href="https://www.p1-intl.com/" target="_blank"><img src="{% static 'logo.png' %}"></a>
-            </div>
-            <div style="margin-left: 30px;">
-                <a href="{% url 'sample:index' %}"><button type="button" class="btn btn-outline-dark">サンプル在庫表</button></a>
-            </div>
-            <div style="margin-left: 30px;">
-                <a href="{% url 'sample:henshu_index' %}"><button type="button" class="btn btn-outline-dark">サンプル登録 / 編集</button></a>
-            </div>
-            <div style="margin-left: 30px;">
-                <a href="{% url 'sample:size_index' %}"><button type="button" class="btn btn-dark">サイズ編集</button></a>
-            </div>
+        <div class="flex2">
+            <div><a href="{% url 'zaiko:index' %}">出荷依頼</a></div>
+            <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
+            <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
         </div>
         <hr>
 
         <!-- サイズ編集 -->
-        <div class="flex2 mt-5" style="margin: 0 auto; width: 1200px;">
-            <div style="width: 200px;">
-                <div class="inlineframe2" style="height: 500px;">
+        <div class="flex mt-5">
+            <div style="width: 180px;">
+                <div class="inlineframe3" style="height: 500px;">
                     <ol class="drag-list">
                         {% for i in sizes %}
                             {% if i.size_num == 0 %}
@@ -51,12 +44,13 @@
                     <button type="button" class="btn btn-secondary" id="btn_size_num">順番決定</button>
                 </div>
             </div>
-            <div style="margin-left: 100px;">
+
+            <div style="margin-left: 70px;">
                 <div>■ 新サイズ登録</div>
                 <div class="mt-3">
-                    <div class="flex3">
+                    <div class="flex2">
                         <div>新規：</div>
-                        <div style="width: 150px;"><input class="form-control" type="text" id="size_new"></div>
+                        <div style="width: 120px;"><input class="form-control" type="text" id="size_new"></div>
                     </div>
                     <div class="mt-3" style="text-align: right;">
                         <button type="button" class="btn btn-secondary" id="btn_size_new">登録</button>
@@ -65,13 +59,13 @@
                 <hr>
                 <div>■ サイズ名変更</div>
                 <div class="mt-3">
-                    <div class="flex3">
+                    <div class="flex2">
                         <div>現在：</div>
-                        <div style="width: 150px;"><input class="form-control" type="text" id="size_name1" readonly></div>
+                        <div style="width: 120px;"><input class="form-control" type="text" id="size_name1" readonly></div>
                     </div>
-                    <div class="flex3 mt-1">
+                    <div class="flex2 mt-1">
                         <div>変更：</div>
-                        <div style="width: 150px;"><input class="form-control" type="text" id="size_name2"></div>
+                        <div style="width: 120px;"><input class="form-control" type="text" id="size_name2"></div>
                     </div>
                     <div class="mt-3" style="text-align: right;">
                         <button type="button" class="btn btn-secondary" id="btn_size_name">変更</button>
@@ -80,17 +74,18 @@
                 <hr>
                 <div>■ サイズ削除</div>
                 <div class="mt-3">
-                    <div class="flex3">
+                    <div class="flex2">
                         <div>削除：</div>
-                        <div style="width: 150px;"><input class="form-control" type="text" id="size_del" readonly></div>
+                        <div style="width: 120px;"><input class="form-control" type="text" id="size_del" readonly></div>
                     </div>
                     <div class="mt-3" style="text-align: right;">
                         <button type="button" class="btn btn-outline-danger" id="btn_size_del">削除</button>
                     </div>
                 </div>
             </div>
-            <div style="margin-left: 100px;">
-                <div>【 同じサイズが登録されているサンプル 】</div>
+
+            <div style="margin-left: 70px;">
+                <div>【 同じサイズが登録されている商品 】</div>
                 <div id="sample_list_count" style="display: none;"></div>
                 <div class="inlineframe mt-2" id="sample_list" style="height: 500px; width: 600px;"></div>
             </div>
@@ -164,20 +159,20 @@
                 document.getElementById("size_name1").value=this.innerText;
                 document.getElementById("size_del").value=this.innerText;
                 $.ajax({
-                    'url': '{% url "zaiko2:size_sample" %}',
+                    'url': '{% url "zaiko2:size_same" %}',
                     'type': 'POST',
                     'data': {'size_name':this.innerText},
                     'dataType': 'json'
                 })
                 .done(function(response){
-                    res=response.size_sample;
+                    res=response.size_same_list;
                     str="";
                     for (var i of res){
                         str=str + "<div class='flex2 main_size'>" + 
-                            "<div style='width:50px;'>" + i.team + "</div>" + 
-                            "<div style='width:80px;'>" + i.shouhin_num + "</div>" + 
-                            "<div style='width:280px;padding-right:15px'>" + i.shouhin_name + "</div>" + 
-                            "<div style='width:130px;'>" + i.color + "</div>" + 
+                            "<div style='width:90px;'>" + i.place + "</div>" + 
+                            "<div style='width:80px; word-wrap: break-word; padding-right:15px;'>" + i.shouhin_num + "</div>" + 
+                            "<div style='width:210px; padding-right:15px;'>" + i.shouhin_name + "</div>" + 
+                            "<div style='width:130px; padding-right:15px;'>" + i.color + "</div>" + 
                             "<div>" + i.size + "</div>" + 
                             "</div>";
                     };
@@ -221,7 +216,7 @@
                 return
             };
             if (document.getElementById("sample_list_count").innerText > 0){
-                var ans =confirm("同じサイズ名を使用しているサンプルが存在します。\n\n本当にサイズ名を変更しますか？");
+                var ans =confirm("同じサイズ名を使用している商品が存在します。\n\n本当にサイズ名を変更しますか？");
                 if (ans == false){
                     return
                 };
@@ -243,7 +238,7 @@
         // サイズ削除
         $('#btn_size_del').on('click', function() {
             if (document.getElementById("sample_list_count").innerText > 0){
-                window.alert("同じサイズ名を使用しているサンプルが存在するため削除できません。\n\n先に該当サンプルのサイズを変更してください。");
+                window.alert("同じサイズ名を使用している商品が存在するため削除できません。\n\n先に該当商品のサイズを変更してください。");
                 return
             };
             document.getElementById("btn_size_del").disabled=true;

@@ -5,8 +5,30 @@ import csv
 import json
 from django.http import JsonResponse
 from datetime import datetime,timedelta
+import os
+from django.http import FileResponse
+from django.conf import settings
 
 
+# 出荷作業依頼書_ダウンロード
+def download_excel_1(request):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'excel', '★出荷作業依頼書（原紙）.xlsm')
+    os.path.exists(file_path)
+    response = FileResponse(open(file_path, 'rb'), as_attachment=True, filename='★出荷作業依頼書（原紙）.xlsm')
+    response['Content-Type'] = 'application/vnd.ms-excel.sheet.macroEnabled.12'
+    return response
+
+
+# 資材・カタログ出荷依頼_ダウンロード
+def download_excel_2(request):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'excel', '資材・カタログ出荷依頼（社内・原紙）.xlsm')
+    os.path.exists(file_path)
+    response = FileResponse(open(file_path, 'rb'), as_attachment=True, filename='資材・カタログ出荷依頼（社内・原紙）.xlsm')
+    response['Content-Type'] = 'application/vnd.ms-excel.sheet.macroEnabled.12'
+    return response
+
+
+# 在庫依頼_index
 def index(request):
     if "zaiko" not in request.session:
         request.session["zaiko"]={}
