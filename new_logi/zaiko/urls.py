@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import index,hinban_enter,hinban_click,color_size_click,place_click,item_add,item_del,order_item_list,order_csv_check,csv_item_add, \
-                    irai_send_check,irai_send_ok,download_excel_1,download_excel_2, \
+                    irai_send_check,irai_send_ok,btn_irai_keep,download_excel_1,download_excel_2, \
                     csv_imp,csv_imp_page,free
 
 
@@ -17,6 +17,7 @@ urlpatterns = [
     path('order_item_list/', order_item_list, name="order_item_list"),
     path('order_csv_check/', order_csv_check, name="order_csv_check"),
     path('csv_item_add/', csv_item_add, name="csv_item_add"),
+    path('btn_irai_keep/', btn_irai_keep, name="btn_irai_keep"),
     path('irai_send_check/', irai_send_check, name="irai_send_check"),
     path('irai_send_ok/', irai_send_ok, name="irai_send_ok"),
 

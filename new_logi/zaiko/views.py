@@ -36,6 +36,14 @@ def index(request):
         request.session["zaiko"]["place"]="物流センター"
     if "items" not in request.session["zaiko"]:
         request.session["zaiko"]["items"]=[]
+    if "shozoku" not in request.session["zaiko"]:
+        request.session["zaiko"]["shozoku"]=""
+    if "tantou" not in request.session["zaiko"]:
+        request.session["zaiko"]["tantou"]=""
+    if "irai_type" not in request.session["zaiko"]:
+        request.session["zaiko"]["irai_type"]=""
+    if "irai_detail" not in request.session["zaiko"]:
+        request.session["zaiko"]["irai_detail"]={}
     
     shozoku_list=Shozoku.objects.all()
     ses_item_list=request.session["zaiko"]["items"]
@@ -262,6 +270,22 @@ def item_del(request):
 
     d={"order_list":order_list}
     return JsonResponse(d)
+
+
+# 依頼ボタン_キープ
+def btn_irai_keep(request):
+    keep_cus=request.POST.get("keep_cus")
+    request.session["zaiko"]["irai_type"]=request.POST.get("irai_type")
+    request.session["zaiko"]["irai_detail"]={"keep_cus":keep_cus}
+
+    print(request.session["zaiko"]["irai_detail"])
+    d={}
+    return JsonResponse(d)
+
+
+
+
+
 
 
 # 依頼送信_最終確認

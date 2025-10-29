@@ -6,6 +6,7 @@ from django.http import JsonResponse
 import io
 import csv
 import json
+from django.db.models import Max
 
 
 # 編集画面
@@ -19,23 +20,18 @@ def henshu_index(request):
     return render(request,"zaiko2/henshu.html",params)
 
 
-# 品番検索に入力
+# 編集_品番検索に入力
 def henshu_hinban_enter(request):
-    team=request.POST.get("team")
-    hinban_enter=request.POST.get("hinban_enter")
-    if team=="全店舗":
-        hinban_list=list(Shouhin.objects.filter(shouhin_num__icontains=hinban_enter).values_list("shouhin_num",flat=True).order_by("shouhin_num").distinct())
-    else:
-        hinban_list=list(Shouhin.objects.filter(team=team,shouhin_num__icontains=hinban_enter).values_list("shouhin_num",flat=True).order_by("shouhin_num").distinct())
+    hinban=request.POST.get("hinban_enter")
+    hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban).values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())
     d={"hinban_list":hinban_list}
     return JsonResponse(d)
 
 
 # 編集_品番クリック
 def henshu_hinban_click(request):
-    team=request.POST.get("team")
     hinban=request.POST.get("hinban")
-    item_list=list(Shouhin.objects.filter(team=team,shouhin_num=hinban).order_by("color","size_num").values())
+    item_list=list(Shouhin.objects.filter(shouhin_set=hinban).order_by("color","size_num").values())
     d={"item_list":item_list}
     return JsonResponse(d)
 
@@ -43,51 +39,24 @@ def henshu_hinban_click(request):
 # 編集_リストクリック
 def henshu_list_click(request):
     hontai_num=request.POST.get("hontai_num")
-    item=list(Shouhin.objects.filter(hontai_num=hontai_num).values())[0]
+    item=Shouhin.objects.filter(hontai_num=hontai_num).values()[0]    
     d={"item":item}
     return JsonResponse(d)
 
 
 # 編集_登録/更新
 def henshu_up(request):
-    hontai_num=request.POST.get("hontai_num")
-    team=request.POST.get("team")
-    shouhin_num=request.POST.get("shouhin_num")
-    shouhin_name=request.POST.get("shouhin_name")
-    color=request.POST.get("color")
-    size=request.POST.get("size")
-    size_num=Size.objects.get(size=size).size_num
-    tana=request.POST.get("tana")
-    joutai=request.POST.get("joutai")
-    rental_day=request.POST.get("rental_day")
-    rental_tantou=request.POST.get("rental_tantou")
-    rental_cus=request.POST.get("rental_cus")
-    bikou=request.POST.get("bikou")
+    dic=request.POST.get("dic")
+    dic=json.loads(dic)
+    dic["shouhin_set"]=dic["shouhin_num"] + "　" + dic["shouhin_name"]
+    dic["size"]=Size.objects.get(size_num=dic["size_num"]).size
+    kubun=0
+    if dic["hontai_num"]=="":
+        dic["hontai_num"]=Shouhin.objects.all().aggregate(Max("hontai_num"))["hontai_num__max"] + 1
+        kubun=1
 
-    # 新規登録
-    if hontai_num=="":
-        Shouhin.objects.create(
-            team=team,shouhin_num=shouhin_num,shouhin_name=shouhin_name,color=color,size=size,size_num=size_num,
-            tana=tana,joutai=joutai,rental_day=rental_day,rental_tantou=rental_tantou,rental_cus=rental_cus,bikou=bikou,
-        )
-    # 内容更新
-    else:
-        ins=Shouhin.objects.get(hontai_num=hontai_num)
-        ins.team=team
-        ins.shouhin_num=shouhin_num
-        ins.shouhin_name=shouhin_name
-        ins.color=color
-        ins.size=size
-        ins.size_num=size_num
-        ins.tana=tana
-        ins.joutai=joutai
-        ins.rental_day=rental_day
-        ins.rental_tantou=rental_tantou
-        ins.rental_cus=rental_cus
-        ins.bikou=bikou
-        ins.save()
-
-    d={}
+    Shouhin.objects.update_or_create(hontai_num=dic["hontai_num"],defaults=dic)
+    d={"kubun":kubun}
     return JsonResponse(d)
 
 
@@ -131,7 +100,7 @@ def size_num(request):
     return JsonResponse(d)
 
 
-# 新規サイズ追加
+# サイズ追加
 def size_new(request):
     size_new=request.POST.get("size_new")
     Size.objects.create(size_num=0, size=size_new)

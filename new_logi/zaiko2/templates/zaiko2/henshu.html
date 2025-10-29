@@ -11,7 +11,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="icon" href="{% static 'sanma.gif' %}">
 
-    <title>店舗用サンプル在庫表（登録 / 編集）</title>
+    <title>物流在庫表（登録/編集）</title>
 
 </head>
 <body>
@@ -35,11 +35,11 @@
                 <div style="width: 500px;"><input class="form-control" type="text" id="hinban_enter"></div>
             </div>
             <div class="mt-3">
-                <select class="form-control" id="hinban" style="width: 600px; height:120px;" size="5"></select>
+                <select class="form-control" id="hinban_list" style="width: 600px; height:120px;" size="5"></select>
             </div>
                 
             <!-- 商品一覧 -->
-            <div class="inlineframe mt-3" style="height: 350px; width: 100%;">
+            <div class="inlineframe mt-3" style="height: 300px; width: 100%;">
                 <table class="table table-bordered tb_zaiko sticky_table" style="font-size: 0.9em;">
                     <thead>
                         <tr class="table-secondary">
@@ -47,14 +47,141 @@
                             <th>サイズ</th>
                             <th style="width: 80px;">キープ数</th>
                             <th style="width: 80px;">在庫数</th>
-                            <th>棚番</th>
                             <th>拠点</th>
+                            <th>棚番</th>                            
                             <th>備考</th>
                             <th>注意事項</th>
                         </tr>
                     </thead>
-                    <tbody id="item_list"></tbody> 
+                    <tbody class="td_hover" id="item_list"></tbody> 
                 </table>
+            </div>
+
+            <!-- 商品詳細 -->
+            <div class="mt-5">
+                <div class="flex2">
+                    <div><button type="button" class="btn btn-secondary" id="btn_copy">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                        </svg> 内容をコピーする
+                    </button></div>
+                    <div style="margin-left: 30px;">
+                        <button type="button" class="btn btn-outline-dark" onclick="henshu_clear()">クリア</button>
+                    </div>
+                </div>
+                <div class="flex2 mt-4">
+                    <div>
+                        <div>本体No.</div>
+                        <div><input class="form-control" type="text" id="up_hontai_num" name="item_detail" style="width: 100px;" readonly></div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>品番 <span style="color: red;">*</span></div>
+                        <div><input class="form-control" type="text" id="up_shouhin_num" name="item_detail" style="width: 200px;"></div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>カラー</div>
+                        <div><input class="form-control" type="text" id="up_color" name="item_detail" style="width: 220px;"></div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>サイズ <span style="color: red;">*</span></div>
+                        <div>
+                            <select class="form-select" id="up_size_num" name="item_detail" style="width: 170px;">
+                                <option value=""></option>
+                                {% for i in size_list %}
+                                <option value="{{i.size_num}}">{{i.size}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>JANコード</div>
+                        <div><input class="form-control" type="text" id="up_jan_code" name="item_detail" style="width: 250px;"></div>
+                    </div>
+                </div>
+
+                <div class="flex2 mt-4">
+                    <div>
+                        <div>品名 <span style="color: red;">*</span></div>
+                        <div><input class="form-control" type="text" id="up_shouhin_name" name="item_detail" style="width: 700px;"></div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>新基幹（在庫）</div>
+                        <div>
+                            <select class="form-select" id="up_sys_stock" name="item_detail" style="width: 150px;">
+                                <option value="0">いいえ</option>
+                                <option value="1">はい</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>新基幹（発注CSV）</div>
+                        <div>
+                            <select class="form-select" id="up_sys_order" name="item_detail" style="width: 150px;">
+                                <option value="0">いいえ</option>
+                                <option value="1">はい</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex2 mt-4">
+                    <div>
+                        <div>拠点 <span style="color: red;">*</span></div>
+                        <div>
+                            <select class="form-select" id="up_place" name="item_detail" style="width: 170px;">
+                                <option value=""></option>
+                                {% for i in place_list %}
+                                <option>{{i.place}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>棚番</div>
+                        <div><input class="form-control" type="text" id="up_tana" name="item_detail" style="width: 200px;"></div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>発注可能数</div>
+                        <div><input class="form-control" type="number" id="up_available" name="item_detail"
+                                style="width: 120px; text-align: right;" value="0"></div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>キープ数</div>
+                        <div><input class="form-control" type="number" id="up_keep" name="item_detail"
+                                style="width: 120px; text-align: right;" value="0"></div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>在庫数</div>
+                        <div><input class="form-control" type="number" id="up_stock" name="item_detail"
+                                style="width: 120px; text-align: right;" value="0"></div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>原価</div>
+                        <div><input class="form-control" type="number" id="up_cost_price" name="item_detail"
+                                style="width: 120px; text-align: right;" value="0"></div>
+                    </div>
+                </div>
+
+                <div class="flex2 mt-4">
+                    <div>
+                        <div>注意事項（依頼フォームに表示）</div>
+                        <div><input class="form-control" type="text" id="up_attention" name="item_detail" style="width: 530px;"></div>
+                    </div>
+                    <div style="margin-left: 30px;">
+                        <div>備考</div>
+                        <div><input class="form-control" type="text" id="up_bikou" name="item_detail" style="width: 540px;"></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex3" style="justify-content: space-between;">
+                    <div>
+                        <button type="button" class="btn btn-outline-danger" id="btn_del"><i class='bi bi-x-lg'></i> 登録削除</button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-primary" id="btn_up"><i class="bi bi-plus-lg"></i> 新規登録</button>
+                    </div>
+                </div>
+
             </div>
             
             
@@ -102,217 +229,168 @@
   
 
         
-        //品番検索
+        //品番_検索
         var hinban_enter = document.getElementById("hinban_enter");
         hinban_enter.addEventListener("input",function(){
             if (hinban_enter.value == ""){
-                document.getElementById("hinban").innerHTML="";
-                document.getElementById("item").innerHTML="";
-                clear();
+                document.getElementById("hinban_list").innerHTML="";
+                document.getElementById("item_list").innerHTML="";
+                henshu_clear();
                 return
             };
             $.ajax({
                 'url': '{% url "zaiko2:henshu_hinban_enter" %}',
                 'type': 'POST',
-                'data': {
-                    'hinban_enter': hinban_enter.value,
-                    'team': document.getElementById("team_select").value
-                },
+                'data': {'hinban_enter': hinban_enter.value},
                 'dataType': 'json'
             })
             .done(function(response){
                 var list = "";
-                if (response.hinban_list.length == 0){
-                    list='<option></option>';
-                } else {
-                    for (var i of response.hinban_list){
-                        list = list + "<option value='" + i + "'>" + i + "</option>";
+                for (var i of response.hinban_list){
+                        list = list + "<option>" + i + "</option>";
                     }
-                }
-                document.getElementById("hinban").innerHTML=list;
+                document.getElementById("hinban_list").innerHTML=list;
             });
         });
 
 
-        //品番選択
-        var hinban = document.getElementById("hinban");
-        hinban.addEventListener("click",function(){
-            var team = document.getElementById("team_select");
-            if (hinban.value != "" && team.value != ""){
+        //品番_クリック
+        document.getElementById("hinban_list").addEventListener("click",function(){
+            hinban_click();
+        });
+
+        
+        //品番_クリック_ajax
+        function hinban_click(){
+            var hinban = document.getElementById("hinban_list");
+            if (hinban.value != ""){
                 $.ajax({
                     'url': '{% url "zaiko2:henshu_hinban_click" %}',
                     'type': 'POST',
-                    'data': {
-                        'team': team.value,
-                        'hinban': hinban.value,
-                        },
+                    'data': {'hinban': hinban.value},                        
                     'dataType': 'json'
                 })
                 .done(function(response){
-                    res=response.item_list;
-                    var str="";
-                    var rental="";
-                    for (var i of res){
-                        if (i.joutai == 0){
-                            rental="あり";
-                        } else if(i.joutai ==1){
-                            rental="貸出中";
-                        } else{
-                            rental="廃番";
-                        };
-                        str=str + "<div class='flex2 main_henshu' id='" + i.hontai_num + "' name='henshu_item'>" + 
-                            "<div style='width:100px;'>" + i.shouhin_num + "</div>" + 
-                            "<div style='width:300px;padding-right:15px'>" + i.shouhin_name + "</div>" + 
-                            "<div style='width:170px;'>" + i.color + "</div>" + 
-                            "<div style='width:100px;'>" + i.size + "</div>" + 
-                            "<div style='width:230px;'>" + i.tana + "</div>" + 
-                            "<div style='width:80px;'>" + rental + "</div>" + 
-                            "</div>";
-                    };
-                    document.getElementById("item").innerHTML=str;
-                    list_click();
+                    str="";
+                    for (var i of response.item_list){
+                        var bikou="";
+                        var attention="";
+                        if (i.bikou){bikou=i.bikou};
+                        if (i.attention){attention=i.attention};
+
+                        str = str + "<tr id='hontai_" + i.hontai_num + "' name='henshu_items'>" +
+                            "<td>" + i.color + "</td>" +
+                            "<td>" + i.size + "</td>" +
+                            "<td style='text-align:right;'>" + i.keep + "</td>" +
+                            "<td style='text-align:right;'>" + i.stock + "</td>" +
+                            "<td>" + i.place + "</td>" +
+                            "<td>" + i.tana + "</td>" +
+                            "<td>" + bikou + "</td>" +
+                            "<td>" + attention + "</td></tr>";
+                    }
+                    document.getElementById("item_list").innerHTML=str;
+                    henshu_item();
+                    henshu_clear();
                 });
             };
-        });
+        }
 
 
-        // 店舗選択
-        document.getElementById("team_select").addEventListener("change",function(){
-            document.getElementById("hinban_enter").value="";
-            document.getElementById("hinban").innerHTML="<option></option>";
-            document.getElementById("item").innerHTML="";
-        });
-
-        
-        // リストクリック
-        function list_click(){
-            var item=document.getElementsByName("henshu_item");
-            for (i=0; i<item.length; i++){
-                item[i].addEventListener("click",function(){
+        // 編集リスト_クリック
+        function henshu_item(){
+            var items=document.getElementsByName("henshu_items");
+            for (var i=0; i<items.length; i++){
+                items[i].addEventListener("click",function(){
                     $.ajax({
                         'url': '{% url "zaiko2:henshu_list_click" %}',
                         'type': 'POST',
-                        'data': {'hontai_num': this.id},
+                        'data': {'hontai_num': this.id.replace("hontai_","")},
                         'dataType': 'json'
                     })
                     .done(function(response){
-                        res=response.item;
-                        document.getElementById("up_hontai_num").innerText=res.hontai_num;
-                        document.getElementById("up_team").value=res.team;
-                        document.getElementById("up_shouhin_num").value=res.shouhin_num;
-                        document.getElementById("up_color").value=res.color;
-                        document.getElementById("up_size").value=res.size;
-                        document.getElementById("up_tana").value=res.tana;
-                        document.getElementById("up_shouhin_name").value=res.shouhin_name;
-                        document.getElementById("up_joutai").value=res.joutai;
-                        document.getElementById("up_rental_day").value=res.rental_day;
-                        document.getElementById("up_rental_tantou").value=res.rental_tantou;
-                        document.getElementById("up_rental_cus").value=res.rental_cus;
-                        document.getElementById("up_bikou").value=res.bikou;
-                        document.getElementById("up_btn").className="btn btn-success";
-                        document.getElementById("up_btn").innerHTML="<i class='bi bi-upload'></i> 内容更新";
-                        tana();
+                        var res=response.item;
+                        for (var [k,v] of Object.entries(res)){
+                            try {
+                                document.getElementById("up_" + k).value=v;
+                            } catch(error) {
+                                continue;
+                            }
+                        }
+                        var btn_up =document.getElementById("btn_up");
+                        btn_up.className="btn btn-success";
+                        btn_up.innerHTML="<i class='bi bi-arrow-repeat'></i> 更新する";
                     });
-                });
-            };
+                })
+            }
         };
 
-        
-        // 内容コピー
-        document.getElementById("detail_copy").addEventListener("click",function(){
-            var hontai_num=document.getElementById("up_hontai_num");
-            if(hontai_num.innerText == ""){
-                window.alert("コピーする対象をリストから選択してください！");
-                return
-            };
-            hontai_num.innerText="";
-            document.getElementById("up_joutai").value="0";
-            document.getElementById("up_rental_day").value="";
-            document.getElementById("up_rental_tantou").value="";
-            document.getElementById("up_rental_cus").value="";
-            document.getElementById("up_btn").className="btn btn-primary";
-            document.getElementById("up_btn").innerHTML="<i class='bi bi-plus-lg'></i> 新規登録";  
+
+        // 編集リスト_クリア
+        function henshu_clear(){
+            var forms=document.getElementsByName("item_detail");
+            var list_0=["up_sys_stock","up_sys_order","up_available","up_keep","up_stock","up_cost_price"];
+            for (var i=0; i<forms.length; i++){
+                if (list_0.includes(forms[i].id)){
+                    forms[i].value=0;
+                } else {
+                    forms[i].value="";
+                }
+            }
+            var btn_up =document.getElementById("btn_up");
+            btn_up.className="btn btn-primary";
+            btn_up.innerHTML="<i class='bi bi-plus-lg'></i> 新規登録";
+        };
+
+
+        // 編集リスト_コピー
+        document.getElementById("btn_copy").addEventListener("click",function(){
+            var btn_up =document.getElementById("btn_up");
+            document.getElementById("up_hontai_num").value="";
+            btn_up.className="btn btn-primary";
+            btn_up.innerHTML="<i class='bi bi-plus-lg'></i> 新規登録";
             window.alert("内容をコピーしました！");
         });
         
+        
+        // 編集リスト_登録更新
+        document.getElementById("btn_up").addEventListener("click",function(){
+            var error_dic={"up_shouhin_num":"品番","up_size_num":"サイズ","up_shouhin_name":"品名","up_place":"拠点"};
+            for (var[k,v] of Object.entries(error_dic)){
+                if (document.getElementById(k).value==""){
+                    window.alert(v + "は必須項目です！");
+                    return
+                }
+            }
 
-        // クリアボタン
-        document.getElementById("detail_clear").addEventListener("click",function(){
-            clear();
-        });
+            var forms=document.getElementsByName("item_detail");
+            var dic={};
+            for (var i=0; i<forms.length; i++){
+                dic[forms[i].id.replace("up_","")]=forms[i].value;
+            }
+            dic=JSON.stringify(dic);
 
-
-        // クリア動作
-        function clear(){
-            document.getElementById("up_hontai_num").innerText="";
-            var team=document.getElementById("ses_team").innerText;
-            if (team=="全店舗"){
-                document.getElementById("up_team").value="";
-            } else {
-                document.getElementById("up_team").value=team;
-            };
-            document.getElementById("up_shouhin_num").value="";
-            document.getElementById("up_color").value="";
-            document.getElementById("up_size").value="";
-            document.getElementById("up_tana").value="";
-            document.getElementById("up_shouhin_name").value="";
-            document.getElementById("up_joutai").value="0";
-            document.getElementById("up_rental_day").value="";
-            document.getElementById("up_rental_tantou").value="";
-            document.getElementById("up_rental_cus").value="";
-            document.getElementById("up_bikou").value="";
-            document.getElementById("up_btn").className="btn btn-primary";
-            document.getElementById("up_btn").innerHTML="<i class='bi bi-plus-lg'></i> 新規登録";
-            tana();
-        };
-
-
-        // 登録・更新
-        document.getElementById("up_btn").addEventListener("click",function(){
-            var str="";
-            if(document.getElementById("up_team").value == ""){str=str + "店舗を指定してください！\n"};
-            if(document.getElementById("up_shouhin_num").value == ""){str=str + "商品番号を入力してください！\n";};            
-            if(document.getElementById("up_shouhin_name").value == ""){str=str + "商品名を入力してください！\n";};      
-            if(document.getElementById("up_size").value == ""){str=str + "サイズを選択してください！";};
-            if(str != ""){
-                window.alert(str);
-                return
-            };
             $.ajax({
                 'url': '{% url "zaiko2:henshu_up" %}',
                 'type': 'POST',
-                'data': {
-                    'hontai_num': document.getElementById("up_hontai_num").innerText,
-                    'team': document.getElementById("up_team").value,
-                    'shouhin_num': document.getElementById("up_shouhin_num").value,
-                    'shouhin_name': document.getElementById("up_shouhin_name").value,
-                    'color': document.getElementById("up_color").value,
-                    'size': document.getElementById("up_size").value,
-                    'tana': document.getElementById("up_tana").value,
-                    'joutai': document.getElementById("up_joutai").value,
-                    'rental_day': document.getElementById("up_rental_day").value,
-                    'rental_tantou': document.getElementById("up_rental_tantou").value,
-                    'rental_cus': document.getElementById("up_rental_cus").value,
-                    'bikou': document.getElementById("up_bikou").value,
-                },
+                'data': {"dic":dic},
                 'dataType': 'json'
             })
             .done(function(response){
-                if (document.getElementById("up_hontai_num").innerText == ""){
-                    window.alert("新規登録が完了しました！");
+                if (response.kubun==0){
+                    window.alert("商品を更新しました！");
                 } else {
-                    window.alert("登録内容を更新しました！");
-                };
-                window.location.reload();
+                    window.alert("新規商品を登録しました！");
+                }
+                henshu_clear();
+                hinban_click();
             });
         });
+        
 
-
-
-        // 登録削除
-        var hontai_num = document.getElementById("up_hontai_num");
+        // 編集リスト_削除
         document.getElementById("btn_del").addEventListener("click",function(){
-            if (hontai_num.innerText == ""){
+            var hontai_num = document.getElementById("up_hontai_num").value;
+            if (hontai_num == ""){
                 window.alert("削除する対象をリストから選択してください！");
                 return
             };
@@ -323,14 +401,17 @@
             $.ajax({
                 'url': '{% url "zaiko2:henshu_del" %}',
                 'type': 'POST',
-                'data': {'hontai_num': hontai_num.innerText},
+                'data': {'hontai_num': hontai_num},
                 'dataType': 'json'
             })
             .done(function(response){
-                window.location.reload();
-                window.alert("削除しました！");                
+                window.alert("削除しました！");
+                henshu_clear();
+                hinban_click();             
             });
         });
+
+
 
     </script>
 
