@@ -115,13 +115,190 @@
 
             <!-- 依頼内容 -->
             <div style="margin-top: 50px;">
+
                 <!-- 依頼者 -->
-                <div id="irai_person_show">
-                    <div class="irai_title" style="width: 100px;">担当者</div>
-                    <div class="flex2 mt-3">
-                        <div>所属：</div>                    
+                <div class="irai_title" style="width: 100px;">担当者</div>
+                <div class="flex2 mt-3">
+                    <div>所属：</div>                    
+                    <div>
+                        <select class="form-select" id="shozoku">
+                            <option></option>
+                            {% for i in shozoku_list %}
+                            <option>{{i}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="hissu">*</div>
+                    <div style="margin-left: 50px;">担当者：</div>
+                    <div><input class="form-control" type="text" id="tantou"></div>
+                    <div class="hissu">*</div>
+                </div>
+
+                <!-- 内容選択 -->
+                <div class="irai_title mt-5" style="width: 100px;">依頼内容</div>
+                <div class="flex2 mt-4">
+                    <div>
+                        <button type="button" class="btn btn-outline-dark" id="irai_zaiko" name="btn_irai" style="width: 200px;">物流在庫出荷</button>
+                    </div>
+                    <div style="margin-left: 50px;">
+                        <button type="button" class="btn btn-outline-dark" id="irai_keep" name="btn_irai" style="width: 200px;">キープ</button>                       
+                    </div>
+                    <div style="margin-left: 50px;">
+                        <button type="button" class="btn btn-outline-dark" id="irai_catalog" name="btn_irai" style="width: 200px;">カタログ発送</button>
+                    </div>
+                    <div id="zaiko_last_check" style="display: none;"></div>
+                </div>
+                
+                <!-- ■ 在庫出荷 -->
+                <div class="mt-5" id="irai_zaiko_show" style="display: none;">
+                    <!-- 出荷日選択 -->
+                    <div>■ 出荷日を選択してください。</div>
+                    <div class="flex2 mt-2">
                         <div>
-                            <select class="form-select" id="shozoku">
+                            <button type="button" class="btn btn-outline-primary" id="zaiko_regular" style="width: 250px;">
+                                定期便<br>
+                                <span style="font-size: 1.1em; font-weight: bold;">{{hassou_day.regular}}出荷</span><br>
+                                <span style="font-size: 0.8em;">（月水金 10時締切）</span>
+                            </button>
+                        </div>
+                        {% if hassou_day.hurry_show %}
+                        <div style="margin-left: 50px;">
+                        {% else %}
+                        <div style="margin-left: 50px; display: none;">
+                        {% endif %}
+                            <button type="button" class="btn btn-outline-danger" id="zaiko_hurry" style="width: 250px;">
+                                お急ぎ便<br>
+                                <span style="font-size: 1.1em; font-weight: bold;">{{hassou_day.hurry}}出荷</span><br>
+                                <span style="font-size: 0.8em;">（基本は翌営業日 【当日希望】）</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-3" id="zaiko_hurry_select"
+                            style="padding: 10px; color: red; background-color: #fff9c4; font-weight: bold; width: 550px; display: none;">
+                            ※「当日出荷」を希望する場合は、必ずロジまでご連絡をお願いします。 
+                    </div>
+                    <!-- 加工/無地選択 -->
+                    <div class="mt-5">■ 商品の種類を選択してください。</div>
+                    <div class="flex2 mt-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="zaiko_kakou" name="radio_zaiko">
+                            <label for="zaiko_kakou">加工あり</label>
+                        </div>
+                        <div class="form-check" style="margin-left: 50px;">
+                            <input class="form-check-input" type="radio" id="zaiko_muji" name="radio_zaiko">
+                            <label for="zaiko_muji">無地</label>
+                        </div>
+                    </div>
+                    <!-- 加工 -->
+                    <div class="flex2 mt-3" id="zaiko_kakou_show" style="display: none;">
+                        <div class="flex2">
+                            <div>加工場/店舗：</div>
+                            <div style="width: 210px;">
+                                <input class="form-control" type="text" id="zaiko_kakouba">
+                            </div>
+                            <div class="hissu">*</div>
+                        </div>
+                        <div class="flex2" style="margin-left: 50px;">
+                            <div>柄名：</div>
+                            <div style="width: 210px;">
+                                <input class="form-control" type="text" id="zaiko_gara">
+                            </div>
+                            <div class="hissu">*</div>
+                        </div>
+                    </div>
+                    <!-- 無地 -->
+                    <div class="flex2 mt-3" id="zaiko_muji_show" style="display: none;">
+                        <div class="flex2">
+                            <div>顧客名：</div>
+                            <div style="width: 200px;">
+                                <input class="form-control" type="text" id="zaiko_cus">
+                            </div>
+                            <div class="hissu">*</div>
+                        </div>
+                        <div class="flex2" style="margin-left: 50px;">
+                            <div>システム発送日：</div>
+                            <div style="width: 150px;">
+                                <input class="form-control" type="date" id="zaiko_system">
+                            </div>
+                            <div class="hissu">*</div>
+                        </div>
+                    </div>
+                    <!-- 備考 -->
+                    <div class="mt-5">
+                        <div>■ 連絡事項</div>
+                        <div style="font-size: 0.9em;">（加工品と無地を物流より同送する場合は、「柄名&完成予定日」をこちらに記入して下さい）</div>
+                        <div><textarea class="form-control" id="zaiko_bikou" style="width: 550px;" rows="3"></textarea></div>                                   
+                    </div>
+                    <!-- 送信 -->
+                    <div class="mt-5">
+                        <button type="button" class="btn btn-outline-dark" style="height: 4em" id="btn_irai_zaiko" t1="" t2="">
+                            <img src="{% static 'tora.gif' %}"> >> では、上記内容で在庫出荷を依頼します！（クリックして送信）
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- ■ キープ -->
+                <div class="mt-5" id="irai_keep_show" style="display: none;">
+                    <div>■ 顧客名を入力してください。</div>
+                    <div class="flex2 mt-3">
+                        <div>顧客名：</div>
+                        <div><input class="form-control" type="text" id="keep_cus" style="width: 200px;"></div>
+                        <div class="hissu">*</div>
+                    </div>
+                    <!-- 送信 -->
+                    <div class="mt-5">
+                        <button type="button" class="btn btn-outline-dark" style="height: 4em"  id="btn_irai_keep">
+                            <img src="{% static 'tora.gif' %}"> >> では、上記内容でキープします！（クリックして送信）
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- ■ カタログ -->
+                <div class="mt-5" id="irai_catalog_show" style="display: none;">
+                    <!-- 出荷日選択 -->
+                    <div>■ 出荷日を選択してください。</div>
+                    <div class="flex2 mt-2">
+                        <div>
+                            <button type="button" class="btn btn-outline-primary" id="catalog_regular" style="width: 250px;">
+                                定期便<br>
+                                <span style="font-size: 1.1em; font-weight: bold;">{{hassou_day.regular}}出荷</span><br>
+                                <span style="font-size: 0.8em;">（月水金 10時締切）</span>
+                            </button>
+                        </div>
+                        {% if hassou_day.hurry_show %}
+                        <div style="margin-left: 50px;">
+                        {% else %}
+                        <div style="margin-left: 50px; display: none;">
+                        {% endif %}
+                            <button type="button" class="btn btn-outline-danger" id="catalog_hurry" style="width: 250px;">
+                                お急ぎ便<br>
+                                <span style="font-size: 1.1em; font-weight: bold;">{{hassou_day.hurry}}出荷</span><br>
+                                <span style="font-size: 0.8em;">（基本は翌営業日 【当日希望】）</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-3" id="catalog_hurry_select"
+                            style="padding: 10px; color: red; background-color: #fff9c4; font-weight: bold; width: 550px; display: none;">
+                            ※「当日出荷」を希望する場合は、必ずロジまでご連絡をお願いします。 
+                    </div>
+                    <!-- 発送先 -->
+                    <div class="mt-5">■ 発送先を選択してください。</div>
+                    <div class="flex2 mt-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="catalog_tempo" name="radio_catalog">
+                            <label for="catalog_tempo">店舗あて</label>
+                        </div>
+                        <div class="form-check" style="margin-left: 50px;">
+                            <input class="form-check-input" type="radio" id="catalog_cus" name="radio_catalog">
+                            <label for="catalog_cus">顧客あて</label>
+                        </div>
+                    </div>
+                    <!-- 店舗あて -->
+                    <div class="flex2 mt-4" id="catalog_tempo_show" style="display: none;">
+                        <div>店舗名：</div>                    
+                        <div style="width: 200px;">
+                            <select class="form-select" id="cat_tempo">
                                 <option></option>
                                 {% for i in shozoku_list %}
                                 <option>{{i}}</option>
@@ -129,40 +306,56 @@
                             </select>
                         </div>
                         <div class="hissu">*</div>
-                        <div style="margin-left: 50px;">担当者：</div>
-                        <div><input class="form-control" type="text" id="tantou"></div>
-                        <div class="hissu">*</div>
+                    </div>                    
+                    <!-- 顧客直送 -->
+                    <div class="mt-4" id="catalog_cus_show" style="display: none;">
+                        <div class="flex2 mt-3">
+                            <div>会社名：</div>
+                            <div><input class="form-control" type="text" id="cat_com" name="c_haisou_com"></div>
+                            <div style="margin-left: 50px;">氏名：</div>
+                            <div><input class="form-control" type="text" id="cat" name="c_haisou_cus"></div>
+                            <div class="hissu">*</div>
+                        </div>
+                        <div class="flex2 mt-3">
+                            <div>郵便番号：</div>
+                            <div><input class="form-control" type="text" id="cat_yubin" name="c_haisou_yubin" style="width: 100px;"></div>
+                            <div class="hissu">*</div>
+                            <div style="margin-left: 50px;">都道府県：</div>
+                            <div><input class="form-control" type="text" id="cat_pref" name="c_haisou_pref" style="width: 150px;"></div>
+                            <div class="hissu">*</div>
+                            <div style="margin-left: 50px;">市区町村：</div>
+                            <div><input class="form-control" type="text" id="cat_city" name="c_haisou_city" style="width: 200px;"></div>
+                            <div class="hissu">*</div>
+                        </div>
+                        <div class="flex2 mt-3">
+                            <div>番地：</div>
+                            <div><input class="form-control" type="text" id="cat_banchi" name="c_haisou_banchi" style="width: 305px;"></div>
+                            <div class="hissu">*</div>
+                            <div style="margin-left: 50px;">建物名（部屋番号）：</div>
+                            <div><input class="form-control" type="text" id="cat_build" name="c_haisou_build" style="width: 310px;"></div>
+                        </div>
+                        <div class="flex2 mt-3">
+                            <div>電話番号：</div>
+                            <div><input class="form-control" type="text" id="cat_tel" name="c_haisou_tel"></div>
+                            <div class="hissu">*</div>
+                            <div style="margin-left: 50px;">メールアドレス（発送連絡）：</div>
+                            <div><input class="form-control" type="email" id="cat_mail" name="c_haisou_mail" style="width: 350px;"></div>
+                        </div>
                     </div>
-                </div>
-
-                <!-- 内容 -->
-                <div class="irai_title mt-5" style="width: 100px;">依頼内容</div>
-                <div class="flex2 mt-4">
-                    <div>
-                        <button type="button" class="btn btn-outline-dark" id="irai_zaiko" name="btn_irai" style="width: 200px;"
-                            data-bs-toggle="modal" data-bs-target="#zaiko_modal">物流在庫出荷</button>
+                    <!-- 備考 -->
+                    <div class="mt-5">
+                        <div>■ 連絡事項</div>
+                        <div><textarea class="form-control" id="catalog_bikou" style="width: 550px;" rows="3"></textarea></div>                                   
                     </div>
-                    <div style="margin-left: 50px;">
-                        <button type="button" class="btn btn-outline-dark" id="irai_keep" name="btn_irai" style="width: 200px;"
-                            data-bs-toggle="modal" data-bs-target="#keep_modal">キープ</button>                       
-                    </div>
-                    <div style="margin-left: 50px;">
-                        <button type="button" class="btn btn-outline-dark" id="irai_catalog" name="btn_irai" style="width: 200px;"
-                            data-bs-toggle="modal" data-bs-target="#catalog_modal">カタログ発送</button>
+                    <!-- 送信 -->
+                    <div class="mt-5">
+                        <button type="button" class="btn btn-outline-dark" style="height: 4em" id="btn_irai_catalog" t1="" t2="">
+                            <img src="{% static 'tora.gif' %}"> >> では、上記内容でカタログを発送します！（クリックして送信）
+                        </button>
                     </div>
                 </div>
                 
-                <!-- 送信 -->
-                <div class="mt-5">
-                    <button type="button" class="btn btn-outline-dark" style="height: 4em" onclick="irai_send()">
-                        <img src="{% static 'tora.gif' %}"> >> では、上記内容で依頼します！（クリックして送信）
-                    </button>
-                </div>
-
             </div>
-
-
-
 
 
             <!-- モーダル1　手動 -->
@@ -253,212 +446,7 @@
                 </div>
             </div>
 
-            <!-- モーダル3　在庫出荷 -->
-            <div class="modal fade" id="zaiko_modal" tabindex="-1" role="dialog" aria-labelledby="modal_3" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <!-- header -->
-                        <div class="modal-header">
-                            <div style="font-size: 1.2em; font-weight: bold;">物流在庫出荷</div>
-                            <div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
-                        </div>
-                        <!-- body -->
-                        <div class="modal-body">
-                            <!-- 出荷日選択 -->
-                            <div>■ 出荷日を選択してください。</div>
-                            <div class="flex2 mt-2">
-                                <div>
-                                    <button type="button" class="btn btn-outline-primary" id="zaiko_regular" style="width: 200px;">
-                                        定期便<br>
-                                        <span style="font-weight: bold;">10月29日（水）出荷</span><br>
-                                        <span style="font-size: 0.8em;">（月水金 10時 ※祝日除く）</span>
-                                    </button>
-                                </div>
-                                <div style="margin-left: 30px;">
-                                    <button type="button" class="btn btn-outline-danger" id="zaiko_hurry" style="width: 200px;">
-                                        お急ぎ便<br>
-                                        <span style="font-weight: bold;">10月28日（火）出荷</span><br>
-                                        <span style="font-size: 0.8em;">（翌営業日）</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mt-2" id="zaiko_hurry_select" style="font-size: 0.9em; color: #ff0000; display: none;">
-                                ※<b>当日出荷</b>を希望する場合は、<br>
-                                依頼送信後に表示される「依頼No」を必ず出荷部まで連絡してください。
-                            </div>
-                            <!-- 加工/無地選択 -->
-                            <div class="mt-5">■ 商品の種類を選択してください。</div>
-                            <div class="flex2 mt-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" id="zaiko_kakou" name="radio_zaiko">
-                                    <label for="zaiko_kakou">加工あり</label>
-                                </div>
-                                <div class="form-check" style="margin-left: 30px;">
-                                    <input class="form-check-input" type="radio" id="zaiko_muji" name="radio_zaiko">
-                                    <label for="zaiko_muji">無地</label>
-                                </div>
-                            </div>
-                            <!-- 加工 -->
-                            <div class="flex2 mt-3" id="zaiko_kakou_show" style="display: none;">
-                                <div>
-                                    <div>加工場 / 店舗 <span style="color: red;">*</span></div>
-                                    <div style="width: 210px;"><input class="form-control" type="text" id="zaiko_kakouba" name="zaiko_kakou_form"></div>
-                                </div>
-                                <div style="margin-left: 20px;">
-                                    <div>柄名 <span style="color: red;">*</span></div>
-                                    <div style="width: 210px;"><input class="form-control" type="text" id="zaiko_gara" name="zaiko_kakou_form"></div>
-                                </div>
-                            </div>
-                            <!-- 無地 -->
-                            <div class="flex2 mt-3" id="zaiko_muji_show" style="display: none;">
-                                <div>
-                                    <div>顧客名 <span style="color: red;">*</span></div>
-                                    <div style="width: 200px;"><input class="form-control" type="text" id="zaiko_cus" name="zaiko_muji_form"></div>
-                                </div>
-                                <div style="margin-left: 20px;">
-                                    <div>システム発送日 <span style="color: red;">*</span></div>
-                                    <div style="width: 150px;"><input class="form-control" type="date" id="zaiko_system" name="zaiko_muji_form"></div>
-                                </div>
-                            </div>
-                            <!-- 備考 -->
-                            <div class="mt-5">
-                                <div>■ 連絡事項</div>
-                                <div style="font-size: 0.9em;">（加工品と無地を物流より同送する場合は、「柄名&完成予定日」をこちらに記入して下さい）</div>
-                                <div><textarea class="form-control" id="zaiko_bikou" rows="3"></textarea></div>                                   
-                            </div>
-                        </div>
-                        <!-- footer -->
-                        <div class="modal-footer">
-                            <div>
-                                <button type="button" class="btn btn-primary" id="modal_zaiko_btn" t1="" t2="">決定する</button>
-                            </div> 
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- モーダル4　キープ -->
-            <div class="modal fade" id="keep_modal" tabindex="-1" role="dialog" aria-labelledby="modal_4" aria-hidden="true">
-                <div class="modal-dialog modal-sm" role="document">
-                    <div class="modal-content">
-                        <!-- header -->
-                        <div class="modal-header">
-                            <div>
-                                <span style="font-size: 1.2em; font-weight: bold;">キープ</span>
-                                <span style="font-size: 0.9em; color: #ff0000; margin-left: 10px;">※期間は2週間です。</span>
-                            </div>
-                            <div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
-                        </div>
-                        <!-- body -->
-                        <div class="modal-body">
-                            <div>顧客名 <span style="color: red;">*</span></div>
-                            <div><input class="form-control" type="text" id="keep_cus" style="width: 200px;"></div>
-                        </div>
-                        <!-- footer -->
-                        <div class="modal-footer">
-                            <div><button type="button" class="btn btn-primary" id="modal_keep_btn">決定する</button></div>    
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- モーダル5　カタログ発送 -->
-            <div class="modal fade" id="catalog_modal" tabindex="-1" role="dialog" aria-labelledby="modal_5" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <!-- header -->
-                        <div class="modal-header">
-                            <div style="font-size: 1.2em; font-weight: bold;">カタログ発送</div>
-                            <div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>                            
-                        </div>
-                        <!-- body -->
-                        <div class="modal-body">
-                            <!-- 選択 -->
-                            <div class="flex2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" id="catalog_tempo" name="radio_catalog">
-                                    <label for="catalog_tempo">店舗あて</label>
-                                </div>
-                                <div class="form-check" style="margin-left: 50px;">
-                                    <input class="form-check-input" type="radio" id="catalog_cus" name="radio_catalog">
-                                    <label for="catalog_cus">顧客直送</label>
-                                </div>
-                            </div>
-                            <!-- 店舗あて -->
-                            <div class="mt-4" id="catalog_tempo_show" style="display: none;">
-                                <div>店舗名 <span style="color: red;">*</span></div>                    
-                                <div style="width: 150px;">
-                                    <select class="form-select" id="cat_tempo">
-                                        <option></option>
-                                        {% for i in shozoku_list %}
-                                        <option>{{i}}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>                    
-                            <!-- 顧客直送 -->
-                            <div class="mt-4" id="catalog_cus_show" style="display: none;">
-                                <div class="flex2">
-                                    <div>
-                                        <div>会社名</div>
-                                        <div style="width: 220px;"><input class="form-control" type="text" id="cat_com" name="cat_cus_form"></div>
-                                    </div>
-                                    <div style="margin-left: 20px;">
-                                        <div>氏名 <span style="color: red;">*</span></div>                                    
-                                        <div style="width: 210px;"><input class="form-control" type="text" id="cat_cus" name="cat_cus_form"></div>                                        
-                                    </div>
-                                </div>
-                                <div class="flex2 mt-3">
-                                    <div>
-                                        <div>郵便番号 <span style="color: red;">*</span></div>
-                                        <div><input class="form-control" type="text" id="cat_yubin" name="cat_cus_form" style="width: 100px;"></div>
-                                    </div>
-                                    <div style="margin-left: 20px;">
-                                        <div>都道府県 <span style="color: red;">*</span></div>
-                                        <div><input class="form-control" type="text" id="cat_pref" name="cat_cus_form" style="width: 100px;"></div>                                       
-                                    </div>
-                                    <div style="margin-left: 20px;">
-                                        <div>市区町村 <span style="color: red;">*</span></div>
-                                        <div><input class="form-control" type="text" id="cat_city" name="cat_cus_form" style="width: 210px;"></div>
-                                    </div>
-                                </div>
-                                <div class="flex2 mt-3">
-                                    <div>
-                                        <div>番地 <span style="color: red;">*</span></div>
-                                        <div><input class="form-control" type="text" id="cat_banchi" name="cat_cus_form" style="width: 220px;"></div>
-                                    </div>
-                                    <div style="margin-left: 20px;">
-                                        <div>建物名（部屋番号）</div>
-                                        <div><input class="form-control" type="text" id="cat_build" name="cat_cus_form" style="width: 210px;"></div>
-                                    </div>
-                                </div>
-                                <div class="flex2 mt-3">
-                                    <div>
-                                        <div>電話番号 <span style="color: red;">*</span></div>
-                                        <div><input class="form-control" type="text" id="cat_tel" name="cat_cus_form" style="width: 140px;"></div>
-                                    </div>
-                                    <div style="margin-left: 20px;">
-                                        <div>メールアドレス（発送連絡）</div>
-                                        <div><input class="form-control" type="email" id="cat_mail" name="cat_cus_form" style="width: 290px;"></div>
-                                    </div>
-                                </div>
-                                
-                            </div>
-
-                        </div>
-                        <!-- footer -->
-                        <div class="modal-footer">
-                            <div>
-                                <button type="button" class="btn btn-primary" id="modal_catalog_btn" t1="">決定する</button>
-                            </div> 
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
-        
-
 
     </div>
 
@@ -872,25 +860,42 @@
         };
 
 
-        // 在庫出荷
+        // 依頼ボタン（在庫/キープ/カタログ）_クリック
+        var btn_irai=document.getElementsByName("btn_irai");
+        for (var i=0; i<btn_irai.length; i++){
+            btn_irai[i].addEventListener("click",function(){
+                for (var h=0; h<btn_irai.length; h++){
+                    if (this.id==btn_irai[h].id){
+                        btn_irai[h].className="btn btn-dark";
+                        document.getElementById(this.id + "_show").style.display="";                        
+                    } else {
+                        btn_irai[h].className="btn btn-outline-dark";
+                        document.getElementById(btn_irai[h].id + "_show").style.display="none";
+                    }
+                }
+            })
+        };
+
+
+        // 在庫出荷_フォーム制御
         var btn_zaiko_regular=document.getElementById("zaiko_regular");
         var btn_zaiko_hurry=document.getElementById("zaiko_hurry");
         var zaiko_hurry_select=document.getElementById("zaiko_hurry_select");
-        var modal_zaiko_btn=document.getElementById("modal_zaiko_btn");
+        var btn_irai_zaiko=document.getElementById("btn_irai_zaiko");
         var zaiko=document.getElementsByName("radio_zaiko");
 
         btn_zaiko_regular.addEventListener("click",function(){
             btn_zaiko_regular.className="btn btn-primary";
             btn_zaiko_hurry.className="btn btn-outline-danger";
             zaiko_hurry_select.style.display="none";
-            modal_zaiko_btn.setAttribute("t1","regular");
+            btn_irai_zaiko.setAttribute("t1","regular");
         })
 
         btn_zaiko_hurry.addEventListener("click",function(){
             btn_zaiko_regular.className="btn btn-outline-primary";
             btn_zaiko_hurry.className="btn btn-danger";
             zaiko_hurry_select.style.display="";
-            modal_zaiko_btn.setAttribute("t1","hurry");
+            btn_irai_zaiko.setAttribute("t1","hurry");
         })
   
         for (var i=0; i<zaiko.length; i++){
@@ -898,7 +903,7 @@
                 for (var h=0; h<zaiko.length; h++){
                     if (this.id==zaiko[h].id){
                         document.getElementById(this.id + "_show").style.display="";
-                        modal_zaiko_btn.setAttribute("t2",this.id);
+                        btn_irai_zaiko.setAttribute("t2",this.id.replace("zaiko_",""));
                     } else {
                         document.getElementById(zaiko[h].id + "_show").style.display="none";
                     }
@@ -907,45 +912,33 @@
         }
 
 
-        // キープ_決定ボタン
-        document.getElementById("modal_keep_btn").addEventListener("click",function(){
-            var keep_cus=document.getElementById("keep_cus").value;
-            if (keep_cus==""){
-                window.alert("顧客名を入力してください！");
-                return
-            }
-            document.querySelector('#keep_modal .btn-close').click();
-            $.ajax({
-                'url': '{% url "zaiko:btn_irai_keep" %}',
-                'type': 'POST',
-                'data': {
-                    'irai_type': "keep",
-                    'keep_cus':keep_cus,
-                },
-                'dataType': 'json'
-            })
-            .done(function(response){
-                
-                irai_send();
-            });
-        })
-
-
-        // カタログ_所属を店舗に反映
-        document.getElementById("shozoku").addEventListener("change",function(){
-            document.getElementById("cat_tempo").value=document.getElementById("shozoku").value;
-        })
-
-        
-        // カタログ_発送先選択
-        var modal_catalog_btn=document.getElementById("modal_catalog_btn");
+        // カタログ_フォーム制御
+        var btn_catalog_regular=document.getElementById("catalog_regular");
+        var btn_catalog_hurry=document.getElementById("catalog_hurry");
+        var catalog_hurry_select=document.getElementById("catalog_hurry_select");
+        var btn_irai_catalog=document.getElementById("btn_irai_catalog");
         var catalog=document.getElementsByName("radio_catalog");
+
+        btn_catalog_regular.addEventListener("click",function(){
+            btn_catalog_regular.className="btn btn-primary";
+            btn_catalog_hurry.className="btn btn-outline-danger";
+            catalog_hurry_select.style.display="none";
+            btn_irai_catalog.setAttribute("t1","regular");
+        })
+
+        btn_catalog_hurry.addEventListener("click",function(){
+            btn_catalog_regular.className="btn btn-outline-primary";
+            btn_catalog_hurry.className="btn btn-danger";
+            catalog_hurry_select.style.display="";
+            btn_irai_catalog.setAttribute("t1","hurry");
+        })
+  
         for (var i=0; i<catalog.length; i++){
             catalog[i].addEventListener("click",function(){
                 for (var h=0; h<catalog.length; h++){
                     if (this.id==catalog[h].id){
                         document.getElementById(this.id + "_show").style.display="";
-                        modal_catalog_btn.setAttribute("t1",this.id);
+                        btn_irai_catalog.setAttribute("t2",this.id.replace("catalog_",""));
                     } else {
                         document.getElementById(catalog[h].id + "_show").style.display="none";
                     }
@@ -953,8 +946,12 @@
             })
         }
 
+        // カタログ_所属を店舗に反映
+        document.getElementById("shozoku").addEventListener("change",function(){
+            document.getElementById("cat_tempo").value=document.getElementById("shozoku").value;
+        })
 
-        // カタログ_住所入力
+        // カタログ_郵便番号API
         var yubin =document.getElementById("cat_yubin");
         yubin.addEventListener("change",function(){
             if (yubin.value != ""){
@@ -973,26 +970,27 @@
         })
 
 
-        // 最終_依頼送信
-        function irai_send(){
-            // 項目チェック
+        // 最終確認_必須項目
+        function irai_hissu_check(){
+            var order_nothing=document.getElementById("order_list_nothing").innerText;
             var shozoku=document.getElementById("shozoku").value;
             var tantou=document.getElementById("tantou").value;
-            var order_nothing=document.getElementById("order_list_nothing").innerText;
+            var alert_str="";
+            if (order_nothing != ""){
+                alert_str = alert_str + "商品が選択されていません！\n";
+            }
             if (shozoku == ""){
-                window.alert("所属を選択してください！");
-                return
+                alert_str = alert_str + "所属を選択してください！\n";
             }
             if (tantou == ""){
-                window.alert("担当者を入力してください！");
-                return
+                alert_str = alert_str + "担当者を入力してください！\n";
             }
-            if (order_nothing != ""){
-                window.alert("商品が選択されていません！");
-                return
-            }
+            return alert_str;
+        };
 
-            // 在庫チェック
+
+        // 最終確認_在庫
+        function irai_zaiko_check(){
             $.ajax({
                 'url': '{% url "zaiko:irai_send_check" %}',
                 'type': 'POST'
@@ -1002,26 +1000,115 @@
                 if (response.alert > 0){
                     order_list(response);
                     window.scroll(0,0);
-                    return
-
+                    document.getElementById("zaiko_last_check").innerText="NG";
                 // 問題なし
                 } else {
-                    $.ajax({
-                        'url': '{% url "zaiko:irai_send_ok" %}',
-                        'type': 'POST',
-                        'data': {
-                            'shozoku': shozoku,
-                            'tantou': tantou,
-                        },
-                        'dataType': 'json'
-                    })
-                    .done(function(response){
-                        
-                        
-                    });
+                    document.getElementById("zaiko_last_check").innerText="OK";
                 }
             });
         }
+
+
+        // 決定送信_在庫出荷
+        btn_irai_zaiko.addEventListener("click",function(){
+            var alert_str=irai_hissu_check();
+
+            var btn_t1=btn_irai_zaiko.getAttribute("t1");
+            var btn_t2=btn_irai_zaiko.getAttribute("t2");
+            var kakouba=document.getElementById("zaiko_kakouba").value;
+            var gara=document.getElementById("zaiko_gara").value;
+            var cus=document.getElementById("zaiko_cus").value;
+            var system=document.getElementById("zaiko_system").value;
+            var bikou=document.getElementById("zaiko_bikou").value;
+
+            if (btn_t1==""){
+                alert_str = alert_str + "出荷日を選択してください！\n";
+            }
+            if (btn_t2==""){
+                alert_str = alert_str + "商品の種類を選択してください！\n";
+            }
+            if (btn_t2=="kakou"){
+                if (kakouba==""){
+                    alert_str = alert_str + "加工場/店舗を入力してください！\n";
+                }
+                if (gara==""){
+                    alert_str = alert_str + "柄名を入力してください！\n";
+                }
+            }
+            if (btn_t2=="muji"){
+                if (cus==""){
+                    alert_str = alert_str + "顧客名を入力してください！\n";
+                }
+                if (system==""){
+                    alert_str = alert_str + "システム発送日を入力してください！";
+                }
+            }
+            // 最終アラート
+            if (alert_str != ""){
+                window.alert(alert_str);
+                return
+            }
+            // 最終在庫
+            irai_zaiko_check();
+            if (document.getElementById("zaiko_last_check").innerText == "NG"){
+                return
+            }
+            // 送信
+            $.ajax({
+                'url': '{% url "zaiko:btn_irai_keep" %}',
+                'type': 'POST',
+                'data': {
+                    'shozoku':document.getElementById("shozoku").value,
+                    'tantou':document.getElementById("tantou").value,
+                    'irai_type': "keep",
+                    'keep_cus':keep_cus,
+                },
+                'dataType': 'json'
+            })
+            .done(function(response){
+                
+                
+            });
+        })
+        
+
+        // 決定送信_キープ
+        document.getElementById("btn_irai_keep").addEventListener("click",function(){
+            var alert_str=irai_hissu_check();
+
+            var keep_cus=document.getElementById("keep_cus").value;
+            if (keep_cus==""){
+                alert_str = alert_str + "顧客名を入力してください！";
+            }
+            // 最終アラート
+            if (alert_str != ""){
+                window.alert(alert_str);
+                return
+            }
+            // 最終在庫
+            irai_zaiko_check();
+            if (document.getElementById("zaiko_last_check").innerText == "NG"){
+                return
+            }
+            // 送信
+            irai_dic={
+                "shozoku":document.getElementById("shozoku").value,
+                "tantou":document.getElementById("tantou").value,
+                "keep_cus":keep_cus,
+            }
+            irai_dic=JSON.stringify(irai_dic);
+            $.ajax({
+                'url': '{% url "zaiko:btn_irai_keep" %}',
+                'type': 'POST',
+                'data': {"irai_dic":irai_dic},
+                'dataType': 'json'
+            })
+            .done(function(response){
+                
+                
+            });
+        })
+        
 
     </script>
 

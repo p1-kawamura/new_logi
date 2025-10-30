@@ -4,10 +4,11 @@ import io
 import csv
 import json
 from django.http import JsonResponse
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,time
 import os
 from django.http import FileResponse
 from django.conf import settings
+import jpholiday
 
 
 # 出荷作業依頼書_ダウンロード
@@ -36,14 +37,6 @@ def index(request):
         request.session["zaiko"]["place"]="物流センター"
     if "items" not in request.session["zaiko"]:
         request.session["zaiko"]["items"]=[]
-    if "shozoku" not in request.session["zaiko"]:
-        request.session["zaiko"]["shozoku"]=""
-    if "tantou" not in request.session["zaiko"]:
-        request.session["zaiko"]["tantou"]=""
-    if "irai_type" not in request.session["zaiko"]:
-        request.session["zaiko"]["irai_type"]=""
-    if "irai_detail" not in request.session["zaiko"]:
-        request.session["zaiko"]["irai_detail"]={}
     
     shozoku_list=Shozoku.objects.all()
     ses_item_list=request.session["zaiko"]["items"]
@@ -53,32 +46,61 @@ def index(request):
         if i["zaiko"]=="ng":
             alert += 1
 
-    hassou_day=[
-        "月曜日（" + next_weekday(0) + "）",
-        "水曜日（" + next_weekday(2) + "）",
-        "金曜日（" + next_weekday(4) + "）"
-    ]
+    # 発送日
+    today=datetime(2025,9,24,10,0,0)
+    # today=datetime.today()
+    regular_day=get_regular_day(today)
+    hurry_day=get_hurry_day(today)
+    hurry_show=True
+    if regular_day < hurry_day:
+        hurry_show=False
 
+    hassou_day={"regular":get_day_show(regular_day),"hurry":get_day_show(hurry_day),"hurry_show":hurry_show}
+          
     params={
         "shozoku_list":shozoku_list,
         "order_list":order_list,
         "alert":alert,
         "hassou_day":hassou_day,
-        }
+    }
     return render(request,"zaiko/index.html",params)
 
 
-# FUNC 翌曜日取得
-def next_weekday(target):
-    today = datetime.today()
-    days_ahead = (target - today.weekday() + 7) % 7
-    if days_ahead == 0:
-        days_ahead = 7  # 今日が対象曜日なら次週を取得
-    next_day = today + timedelta(days=days_ahead)
-    return next_day.date().strftime("%m/%d")
+# FUNC 定期便計算
+def get_regular_day(today):
+    if today.weekday() in [0,2,4] and jpholiday.is_holiday(today)==False and today.time()<time(10,0,0):
+        regular_day=today
+    else:
+        target_day=today + timedelta(days=1)
+        while True:
+            if target_day.weekday() in [0,2,4] and jpholiday.is_holiday(target_day)==False:
+                regular_day=target_day
+                break
+            else:
+                target_day += timedelta(days=1)
+    return regular_day.date()
 
 
-#モーダル_品番検索に入力
+# FUNC お急ぎ便計算
+def get_hurry_day(today):
+    target_day=today + timedelta(days=1)
+    while True:
+        if target_day.weekday() not in [5,6] and jpholiday.is_holiday(target_day)==False:
+            hurry_day=target_day
+            break
+        else:
+            target_day += timedelta(days=1)
+    return hurry_day.date()
+
+
+# FUNC 日付（表示用）
+def get_day_show(day):
+    week=["月", "火", "水", "木", "金", "土", "日"]
+    day=f"{day.month}月{day.day}日（{week[day.weekday()]}）"
+    return day
+
+
+# モーダル_品番検索に入力
 def hinban_enter(request):
     hinban_enter=request.POST.get("hinban_enter")
     hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban_enter).values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())
@@ -86,7 +108,7 @@ def hinban_enter(request):
     return JsonResponse(d)
 
 
-#モーダル_品番リストをクリック
+# モーダル_品番リストをクリック
 def hinban_click(request):
     hinban=request.POST.get("hinban")
     color_list=list(Shouhin.objects.filter(shouhin_set=hinban).values_list("color",flat=True).order_by("color").distinct())
@@ -107,7 +129,7 @@ def hinban_click(request):
     return JsonResponse(d)
 
 
-#モーダル_カラー、サイズをクリック
+# モーダル_カラー、サイズをクリック
 def color_size_click(request):
     hinban=request.POST.get("hinban")
     color=request.POST.get("color")
@@ -274,11 +296,10 @@ def item_del(request):
 
 # 依頼ボタン_キープ
 def btn_irai_keep(request):
-    keep_cus=request.POST.get("keep_cus")
-    request.session["zaiko"]["irai_type"]=request.POST.get("irai_type")
-    request.session["zaiko"]["irai_detail"]={"keep_cus":keep_cus}
+    irai_dic=request.POST.get("irai_dic")
+    irai_dic=json.loads(irai_dic)
+    print(irai_dic)
 
-    print(request.session["zaiko"]["irai_detail"])
     d={}
     return JsonResponse(d)
 
