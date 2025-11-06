@@ -47,15 +47,15 @@ def index(request):
             alert += 1
 
     # 発送日
-    today=datetime(2025,9,24,10,0,0)
+    today=datetime(2025,11,5,9,0,0)
     # today=datetime.today()
-    regular_day=get_regular_day(today)
+    regular_day,regular_att=get_regular_day(today)
     hurry_day=get_hurry_day(today)
     hurry_show=True
     if regular_day < hurry_day:
         hurry_show=False
 
-    hassou_day={"regular":get_day_show(regular_day),"hurry":get_day_show(hurry_day),"hurry_show":hurry_show}
+    hassou_day={"regular":get_day_show(regular_day),"regular_att":regular_att,"hurry":get_day_show(hurry_day),"hurry_show":hurry_show}
           
     params={
         "shozoku_list":shozoku_list,
@@ -66,19 +66,21 @@ def index(request):
     return render(request,"zaiko/index.html",params)
 
 
-# FUNC 定期便計算
+# FUNC 通常便計算
 def get_regular_day(today):
     if today.weekday() in [0,2,4] and jpholiday.is_holiday(today)==False and today.time()<time(10,0,0):
         regular_day=today
+        regular_attention="yes"
     else:
         target_day=today + timedelta(days=1)
         while True:
             if target_day.weekday() in [0,2,4] and jpholiday.is_holiday(target_day)==False:
                 regular_day=target_day
+                regular_attention="no"
                 break
             else:
                 target_day += timedelta(days=1)
-    return regular_day.date()
+    return (regular_day.date(),regular_attention)
 
 
 # FUNC お急ぎ便計算
@@ -98,6 +100,14 @@ def get_day_show(day):
     week=["月", "火", "水", "木", "金", "土", "日"]
     day=f"{day.month}月{day.day}日（{week[day.weekday()]}）"
     return day
+
+
+# ajax_通常便計算
+def ajax_regular_day(request):
+    today=datetime.today()
+    regular_day,regular_att=get_regular_day(today)
+    d={"regular":get_day_show(regular_day)}
+    return JsonResponse(d)
 
 
 # モーダル_品番検索に入力
@@ -294,8 +304,41 @@ def item_del(request):
     return JsonResponse(d)
 
 
+# 依頼送信_最終確認
+def zaiko_last_check(request):
+    ses_item_list=request.session["zaiko"]["items"]
+    order_list=order_item_list(ses_item_list)
+    alert=0
+    for i in order_list:
+        if i["zaiko"]=="ng":
+            alert += 1
+
+    d={"order_list":order_list,"alert":alert}
+    return JsonResponse(d)
+
+
+# 依頼ボタン_在庫
+def btn_irai_zaiko(request):
+    irai_dic=request.POST.get("irai_dic")
+    irai_dic=json.loads(irai_dic)
+    print(irai_dic)
+
+    d={}
+    return JsonResponse(d)
+
+
 # 依頼ボタン_キープ
 def btn_irai_keep(request):
+    irai_dic=request.POST.get("irai_dic")
+    irai_dic=json.loads(irai_dic)
+    print(irai_dic)
+
+    d={}
+    return JsonResponse(d)
+
+
+# 依頼ボタン_カタログ
+def btn_irai_catalog(request):
     irai_dic=request.POST.get("irai_dic")
     irai_dic=json.loads(irai_dic)
     print(irai_dic)
@@ -308,34 +351,6 @@ def btn_irai_keep(request):
 
 
 
-
-# 依頼送信_最終確認
-def irai_send_check(request):
-    ses_item_list=request.session["zaiko"]["items"]
-    order_list=order_item_list(ses_item_list)
-    alert=0
-    for i in order_list:
-        if i["zaiko"]=="ng":
-            alert += 1
-
-    d={"order_list":order_list,"alert":alert}
-    return JsonResponse(d)
-
-
-# 依頼送信_成功
-def irai_send_ok(request):
-    shozoku=request.POST.get("shozoku")
-    tantou=request.POST.get("tantou")
-    irai_type=request.POST.get("irai_type")
-    form_dic=request.POST.get("form_dic")
-    form_dic=json.loads(form_dic)
-    bikou=request.POST.get("bikou")
-    ses_item_list=request.session["zaiko"]["items"]
-
-    print(shozoku,tantou,irai_type,form_dic,bikou)
-
-    d={}
-    return JsonResponse(d)
 
 
 

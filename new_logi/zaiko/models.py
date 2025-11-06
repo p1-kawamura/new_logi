@@ -51,3 +51,22 @@ class Size(models.Model):
 
     def __str__(self):
         return self.size
+    
+
+class Irai_list(models.Model):
+    irai_num=models.IntegerField("依頼No",primary_key=True)
+    irai_day=models.DateTimeField("依頼日",auto_now_add=True)
+    shozoku=models.CharField("所属",max_length=255,blank=True)
+    tantou=models.CharField("担当者",max_length=255,blank=True)
+    irai_type=models.IntegerField("依頼内容",default=0)
+    hassou_type=models.IntegerField("発送タイプ",default=0)
+    hassou_day=models.DateField("発送日",null=True,default=None)
+
+
+    def __str__(self):
+        return str(self.irai_num)
+    
+    # irai_type（依頼内容）　0:在庫出荷　1:キープ　2:カタログ発送
+    # hassou_type（発送日タイプ）　0:なし（キープ） 1:通常便　2:お急ぎ便　3:当日発送
+
+    
