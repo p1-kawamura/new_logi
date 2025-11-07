@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import index,hinban_enter,hinban_click,color_size_click,place_click,item_add,item_del,order_item_list,order_csv_check,csv_item_add, \
-                    zaiko_last_check,ajax_regular_day,btn_irai_zaiko,btn_irai_keep,btn_irai_catalog,download_excel_1,download_excel_2, \
+                    zaiko_last_check,ajax_regular_day,irai_send_all,rireki_index,download_excel_1,download_excel_2, \
                     csv_imp,csv_imp_page,free
 
 
@@ -19,9 +19,8 @@ urlpatterns = [
     path('csv_item_add/', csv_item_add, name="csv_item_add"),
     path('zaiko_last_check/', zaiko_last_check, name="zaiko_last_check"),
     path('ajax_regular_day/', ajax_regular_day, name="ajax_regular_day"),
-    path('btn_irai_zaiko/', btn_irai_zaiko, name="btn_irai_zaiko"),
-    path('btn_irai_keep/', btn_irai_keep, name="btn_irai_keep"),
-    path('btn_irai_catalog/', btn_irai_catalog, name="btn_irai_catalog"),
+    path('irai_send_all/', irai_send_all, name="irai_send_all"),
+    path('rireki_index/', rireki_index, name="rireki_index"),
 
     path('download_excel_1/', download_excel_1, name="download_excel_1"),
     path('download_excel_2/', download_excel_2, name="download_excel_2"),

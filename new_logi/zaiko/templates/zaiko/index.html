@@ -20,6 +20,7 @@
             <!-- メニュー -->
             <div class="flex2">
                 <div><a href="{% url 'zaiko:index' %}">出荷依頼</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko:rireki_index' %}">履歴一覧</a></div>
                 <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
                 <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
             </div>
@@ -154,20 +155,20 @@
                     <div>■ 出荷日を選択してください。</div>
                     <div class="flex2 mt-2">
                         <div>
-                            <button type="button" class="btn btn-outline-primary" id="zaiko_regular" style="width: 250px;" att="{{hassou_day.regular_att}}">
+                            <button type="button" class="btn btn-outline-primary" id="zaiko_regular" style="width: 250px;" att="{{regular_att}}" day="{{regular_day}}">
                                 通常便<br>
-                                <span style="font-size: 1.1em; font-weight: bold;" id="zaiko_regular_day">{{hassou_day.regular}}出荷</span><br>
+                                <span style="font-size: 1.1em; font-weight: bold;" id="zaiko_regular_day">{{regular}}出荷</span><br>
                                 <span style="font-size: 0.8em;">（月水金 10時締切）</span>
                             </button>
                         </div>
-                        {% if hassou_day.hurry_show %}
+                        {% if hurry_show %}
                         <div style="margin-left: 50px;">
                         {% else %}
                         <div id="zaiko_hurry_show" style="margin-left: 50px; display: none;">
                         {% endif %}
-                            <button type="button" class="btn btn-outline-danger" id="zaiko_hurry" style="width: 250px;">
+                            <button type="button" class="btn btn-outline-danger" id="zaiko_hurry" style="width: 250px;" day="{{hurry_day}}">
                                 お急ぎ便<br>
-                                <span style="font-size: 1.1em; font-weight: bold;">{{hassou_day.hurry}}出荷</span><br>
+                                <span style="font-size: 1.1em; font-weight: bold;">{{hurry}}出荷</span><br>
                                 <span style="font-size: 0.8em;">（当日出荷はこちら）</span>
                             </button>
                         </div>
@@ -230,7 +231,7 @@
                     </div>
                     <!-- 送信 -->
                     <div class="mt-5">
-                        <button type="button" class="btn btn-outline-dark" style="height: 4em" id="btn_irai_zaiko" t1="" t2="">
+                        <button type="button" class="btn btn-outline-dark" style="height: 4em" id="btn_irai_zaiko" t1="" t2="" t1_day="">
                             <img src="{% static 'tora.gif' %}"> >> では、上記内容で在庫出荷を依頼します！（クリックして送信）
                         </button>
                     </div>
@@ -259,20 +260,20 @@
                     <div>■ 出荷日を選択してください。</div>
                     <div class="flex2 mt-2">
                         <div>
-                            <button type="button" class="btn btn-outline-primary" id="catalog_regular" style="width: 250px;" att="{{hassou_day.regular_att}}">
+                            <button type="button" class="btn btn-outline-primary" id="catalog_regular" style="width: 250px;" att="{{regular_att}}" day="{{regular_day}}">
                                 通常便<br>
-                                <span style="font-size: 1.1em; font-weight: bold;" id="catalog_regular_day">{{hassou_day.regular}}出荷</span><br>
+                                <span style="font-size: 1.1em; font-weight: bold;" id="catalog_regular_day">{{regular}}出荷</span><br>
                                 <span style="font-size: 0.8em;">（月水金 10時締切）</span>
                             </button>
                         </div>
-                        {% if hassou_day.hurry_show %}
+                        {% if hurry_show %}
                         <div style="margin-left: 50px;">
                         {% else %}
                         <div id="catalog_hurry_show" style="margin-left: 50px; display: none;">
                         {% endif %}
-                            <button type="button" class="btn btn-outline-danger" id="catalog_hurry" style="width: 250px;">
+                            <button type="button" class="btn btn-outline-danger" id="catalog_hurry" style="width: 250px;" day="{{hurry_day}}">
                                 お急ぎ便<br>
-                                <span style="font-size: 1.1em; font-weight: bold;">{{hassou_day.hurry}}出荷</span><br>
+                                <span style="font-size: 1.1em; font-weight: bold;">{{hurry}}出荷</span><br>
                                 <span style="font-size: 0.8em;">（当日出荷はこちら）</span>
                             </button>
                         </div>
@@ -348,7 +349,7 @@
                     </div>
                     <!-- 送信 -->
                     <div class="mt-5">
-                        <button type="button" class="btn btn-outline-dark" style="height: 4em" id="btn_irai_catalog" t1="" t2="">
+                        <button type="button" class="btn btn-outline-dark" style="height: 4em" id="btn_irai_catalog" t1="" t2="" t1_day="">
                             <img src="{% static 'tora.gif' %}"> >> では、上記内容でカタログを発送します！（クリックして送信）
                         </button>
                     </div>
@@ -889,6 +890,7 @@
             btn_zaiko_hurry.className="btn btn-outline-danger";
             zaiko_hurry_select.style.display="none";
             btn_irai_zaiko.setAttribute("t1","regular");
+            btn_irai_zaiko.setAttribute("t1_day",btn_zaiko_regular.getAttribute("day"));
         })
 
         btn_zaiko_hurry.addEventListener("click",function(){
@@ -896,6 +898,7 @@
             btn_zaiko_hurry.className="btn btn-danger";
             zaiko_hurry_select.style.display="";
             btn_irai_zaiko.setAttribute("t1","hurry");
+            btn_irai_zaiko.setAttribute("t1_day",btn_zaiko_hurry.getAttribute("day"));
         })
   
         for (var i=0; i<zaiko.length; i++){
@@ -924,6 +927,7 @@
             btn_catalog_hurry.className="btn btn-outline-danger";
             catalog_hurry_select.style.display="none";
             btn_irai_catalog.setAttribute("t1","regular");
+            btn_irai_catalog.setAttribute("t1_day",btn_catalog_regular.getAttribute("day"));
         })
 
         btn_catalog_hurry.addEventListener("click",function(){
@@ -931,6 +935,7 @@
             btn_catalog_hurry.className="btn btn-danger";
             catalog_hurry_select.style.display="";
             btn_irai_catalog.setAttribute("t1","hurry");
+            btn_irai_catalog.setAttribute("t1_day",btn_catalog_hurry.getAttribute("day"));
         })
   
         for (var i=0; i<catalog.length; i++){
@@ -995,6 +1000,7 @@
 
             var btn_reg=document.getElementById("zaiko_regular");
             var btn_t1=btn_irai_zaiko.getAttribute("t1");
+            var btn_t1_day=btn_irai_zaiko.getAttribute("t1_day");
             var btn_t2=btn_irai_zaiko.getAttribute("t2");
             var kakouba=document.getElementById("zaiko_kakouba").value;
             var gara=document.getElementById("zaiko_gara").value;
@@ -1015,9 +1021,11 @@
                     })
                     .done(function(response){
                         btn_reg.className="btn btn-outline-primary";
+                        btn_reg.setAttribute("day",response.regular_day);
                         document.getElementById("zaiko_regular_day").innerText=response.regular + "出荷";
                         document.getElementById("zaiko_hurry_show").style.display="block";
                         btn_irai_zaiko.setAttribute("t1","");
+                        btn_irai_zaiko.setAttribute("t1_day","");
                         btn_reg.setAttribute("att","no");
                     });
                     return
@@ -1062,9 +1070,11 @@
                 } else {
                     // 送信
                     irai_dic={
+                        "irai_type":"zaiko",
                         "shozoku":document.getElementById("shozoku").value,
                         "tantou":document.getElementById("tantou").value,
                         "btn_t1":btn_t1,
+                        "btn_t1_day":btn_t1_day,
                         "btn_t2":btn_t2,
                         "kakouba":kakouba,
                         "gara":gara,
@@ -1074,7 +1084,7 @@
                     }
                     irai_dic=JSON.stringify(irai_dic);
                     $.ajax({
-                        'url': '{% url "zaiko:btn_irai_zaiko" %}',
+                        'url': '{% url "zaiko:irai_send_all" %}',
                         'type': 'POST',
                         'data': {"irai_dic":irai_dic},
                         'dataType': 'json'
@@ -1116,13 +1126,14 @@
                 } else {
                     // 送信
                     irai_dic={
+                        "irai_type":"keep",
                         "shozoku":document.getElementById("shozoku").value,
                         "tantou":document.getElementById("tantou").value,
                         "keep_cus":keep_cus,
                     }
                     irai_dic=JSON.stringify(irai_dic);
                     $.ajax({
-                        'url': '{% url "zaiko:btn_irai_keep" %}',
+                        'url': '{% url "zaiko:irai_send_all" %}',
                         'type': 'POST',
                         'data': {"irai_dic":irai_dic},
                         'dataType': 'json'
@@ -1142,6 +1153,7 @@
 
             var btn_reg=document.getElementById("catalog_regular");
             var btn_t1=btn_irai_catalog.getAttribute("t1");
+            var btn_t1_day=btn_irai_catalog.getAttribute("t1_day");
             var btn_t2=btn_irai_catalog.getAttribute("t2");
             var tempo=document.getElementById("cat_tempo").value;
             var cat_form=document.getElementsByName("cat_form");
@@ -1160,9 +1172,11 @@
                     })
                     .done(function(response){
                         btn_reg.className="btn btn-outline-primary";
+                        btn_reg.setAttribute("day",response.regular_day);
                         document.getElementById("catalog_regular_day").innerText=response.regular + "出荷";
                         document.getElementById("catalog_hurry_show").style.display="block";
                         btn_irai_catalog.setAttribute("t1","");
+                        btn_irai_catalog.setAttribute("t1_day","");
                         btn_reg.setAttribute("att","no");
                     });
                     return
@@ -1205,9 +1219,11 @@
                         cus_dic[i.id]=i.value;
                     }
                     irai_dic={
+                        "irai_type":"catalog",
                         "shozoku":document.getElementById("shozoku").value,
                         "tantou":document.getElementById("tantou").value,
                         "btn_t1":btn_t1,
+                        "btn_t1_day":btn_t1_day,
                         "btn_t2":btn_t2,
                         "tempo":tempo,
                         "cus_dic":cus_dic,
@@ -1215,7 +1231,7 @@
                     }
                     irai_dic=JSON.stringify(irai_dic);
                     $.ajax({
-                        'url': '{% url "zaiko:btn_irai_catalog" %}',
+                        'url': '{% url "zaiko:irai_send_all" %}',
                         'type': 'POST',
                         'data': {"irai_dic":irai_dic},
                         'dataType': 'json'

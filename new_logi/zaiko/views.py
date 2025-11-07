@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from .models import Shouhin,Place,Shozoku,Size
+from .models import Shouhin,Place,Shozoku,Size,Irai_list,Irai_detail
 import io
 import csv
 import json
@@ -9,6 +9,7 @@ import os
 from django.http import FileResponse
 from django.conf import settings
 import jpholiday
+from django.db.models import Max
 
 
 # 出荷作業依頼書_ダウンロード
@@ -47,21 +48,24 @@ def index(request):
             alert += 1
 
     # 発送日
-    today=datetime(2025,11,5,9,0,0)
-    # today=datetime.today()
+    # today=datetime(2025,11,5,9,0,0)
+    today=datetime.today()
     regular_day,regular_att=get_regular_day(today)
     hurry_day=get_hurry_day(today)
     hurry_show=True
     if regular_day < hurry_day:
         hurry_show=False
 
-    hassou_day={"regular":get_day_show(regular_day),"regular_att":regular_att,"hurry":get_day_show(hurry_day),"hurry_show":hurry_show}
-          
     params={
         "shozoku_list":shozoku_list,
         "order_list":order_list,
         "alert":alert,
-        "hassou_day":hassou_day,
+        "regular":get_day_show(regular_day),
+        "regular_day":str(regular_day),
+        "regular_att":regular_att,
+        "hurry":get_day_show(hurry_day),
+        "hurry_day":str(hurry_day),
+        "hurry_show":hurry_show
     }
     return render(request,"zaiko/index.html",params)
 
@@ -106,7 +110,7 @@ def get_day_show(day):
 def ajax_regular_day(request):
     today=datetime.today()
     regular_day,regular_att=get_regular_day(today)
-    d={"regular":get_day_show(regular_day)}
+    d={"regular":get_day_show(regular_day),"regular_day":regular_day}
     return JsonResponse(d)
 
 
@@ -317,34 +321,111 @@ def zaiko_last_check(request):
     return JsonResponse(d)
 
 
-# 依頼ボタン_在庫
-def btn_irai_zaiko(request):
+# 依頼確定（在庫出荷 / キープ / カタログ）
+def irai_send_all(request):
     irai_dic=request.POST.get("irai_dic")
-    irai_dic=json.loads(irai_dic)
-    print(irai_dic)
+    dic=json.loads(irai_dic)
+    irai_type=dic["irai_type"]
+    try:
+        irai_num=Irai_list.objects.all().aggregate(Max("irai_num"))["irai_num__max"] + 1
+    except:
+        irai_num=1
+
+    ####### Irai_list #######
+    if irai_type in ["zaiko","catalog"]:
+        if dic["btn_t1"]=="regular":
+            hassou_type=1
+        else:
+            hassou_type=2
+
+    # 在庫出荷
+    if irai_type=="zaiko":
+        Irai_list.objects.create(
+            irai_num=irai_num,
+            shozoku=dic["shozoku"],
+            tantou=dic["tantou"],
+            irai_type=0,
+            hassou_type=hassou_type,
+            hassou_day=dic["btn_t1_day"],
+            zaiko_type=dic["btn_t2"],
+            zaiko_kakouba=dic["kakouba"],
+            zaiko_gara=dic["gara"],
+            zaiko_cus=dic["cus"],
+            zaiko_system=dic["system"],
+            bikou=dic["bikou"],
+        )
+    # キープ
+    elif irai_type=="keep":
+        Irai_list.objects.create(
+            irai_num=irai_num,
+            shozoku=dic["shozoku"],
+            tantou=dic["tantou"],
+            irai_type=1,
+            irai_status=1,
+            keep_cus=dic["keep_cus"],
+        )
+    # カタログ発送
+    elif irai_type=="catalog":
+        Irai_list.objects.create(
+            irai_num=irai_num,
+            shozoku=dic["shozoku"],
+            tantou=dic["tantou"],
+            irai_type=2,
+            hassou_type=hassou_type,
+            hassou_day=dic["btn_t1_day"],
+            catalog_type=dic["btn_t2"],
+            catalog_tempo=dic["tempo"],
+            catalog_cus_com=dic["cus_dic"]["cat_com"],
+            catalog_cus_name=dic["cus_dic"]["cat_name"],
+            catalog_cus_yubin=dic["cus_dic"]["cat_yubin"],
+            catalog_cus_pref=dic["cus_dic"]["cat_pref"],
+            catalog_cus_city=dic["cus_dic"]["cat_city"],
+            catalog_cus_banchi=dic["cus_dic"]["cat_banchi"],
+            catalog_cus_build=dic["cus_dic"]["cat_build"],
+            catalog_cus_tel=dic["cus_dic"]["cat_tel"],
+            catalog_cus_mail=dic["cus_dic"]["cat_mail"],
+            bikou=dic["bikou"],
+        )
+
+    ####### 商品 #######
+    items=request.session["zaiko"]["items"]
+    for i in items:
+        hontai_num,kazu=map(int,i.split("_"))
+        ins=Shouhin.objects.get(hontai_num=hontai_num)
+
+        # Irai_detail
+        Irai_detail.objects.create(
+            irai_num=irai_num,
+            hontai_num=ins.hontai_num,
+            place=ins.place,
+            shouhin_num=ins.shouhin_num,
+            shouhin_name=ins.shouhin_name,
+            color=ins.color,
+            size=ins.size,
+            size_num=ins.size_num,
+            tana=ins.tana,
+            cost_price=ins.cost_price,
+            bikou=ins.bikou,
+            attention=ins.attention,
+            jan_code=ins.jan_code,
+            kazu=kazu,
+        )
+        # Shouhin
+        if irai_type in ["zaiko","catalog"]:
+            ins.available -= kazu
+        elif irai_type=="keep":
+            ins.keep += kazu
+            ins.available -= kazu
+        ins.save()
+
 
     d={}
     return JsonResponse(d)
 
 
-# 依頼ボタン_キープ
-def btn_irai_keep(request):
-    irai_dic=request.POST.get("irai_dic")
-    irai_dic=json.loads(irai_dic)
-    print(irai_dic)
-
-    d={}
-    return JsonResponse(d)
-
-
-# 依頼ボタン_カタログ
-def btn_irai_catalog(request):
-    irai_dic=request.POST.get("irai_dic")
-    irai_dic=json.loads(irai_dic)
-    print(irai_dic)
-
-    d={}
-    return JsonResponse(d)
+# 依頼履歴_一覧
+def rireki_index(request):
+    return render(request,"zaiko/rireki_list.html")
 
 
 
