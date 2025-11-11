@@ -59,6 +59,32 @@
     margin-left: 5px;
     font-size: 1.2em;
 }
+.highlight {
+  text-decoration: underline;
+  text-decoration-thickness: 0.5em;
+  text-decoration-color: #ffff80;
+  text-underline-offset: -0.2em;
+  text-decoration-skip-ink: none;
+}
+.point {
+    position: relative;
+    margin: 2em 0;
+    padding: 0.5em 1em;
+    border: solid 3px  #f75f58;
+}
+.point .box-title {
+    position: absolute;
+    display: inline-block;
+    top: -27px;
+    left: -2.5px;
+    padding: 0 9px;
+    height: 25px;
+    line-height: 25px;
+    font-size: 17px;
+    background: #f75f58;
+    color: #fff;
+    border-radius: 5px 5px 0 0;
+}
 
 /* zaiko2 */
 

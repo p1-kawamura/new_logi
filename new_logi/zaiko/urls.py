@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import index,hinban_enter,hinban_click,color_size_click,place_click,item_add,item_del,order_item_list,order_csv_check,csv_item_add, \
-                    zaiko_last_check,ajax_regular_day,irai_send_all,rireki_index,download_excel_1,download_excel_2, \
+                    zaiko_last_check,ajax_regular_day,irai_send_all,rireki_index,rireki_detail,download_excel_1,download_excel_2, \
                     csv_imp,csv_imp_page,free
 
 
@@ -21,6 +21,7 @@ urlpatterns = [
     path('ajax_regular_day/', ajax_regular_day, name="ajax_regular_day"),
     path('irai_send_all/', irai_send_all, name="irai_send_all"),
     path('rireki_index/', rireki_index, name="rireki_index"),
+    path('rireki_detail/<int:irai_num>', rireki_detail, name="rireki_detail"),
 
     path('download_excel_1/', download_excel_1, name="download_excel_1"),
     path('download_excel_2/', download_excel_2, name="download_excel_2"),

@@ -1,0 +1,277 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'main.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="icon" href="{% static 'tamori.gif' %}">   
+    <title>物流在庫_履歴詳細</title>
+</head>
+<body>
+    <div class="mt-3 mb-5">
+
+        <div style="margin: 0 auto; width: 1100px;">
+            
+            <!-- メニュー -->
+            <div class="flex2">
+                <div><a href="{% url 'zaiko:index' %}">出荷依頼</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko:rireki_index' %}">履歴一覧</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
+            </div>
+            <hr>
+
+            <!-- タイトル -->
+            <div style="margin-top: 30px;">
+                
+            </div>
+
+            <!-- 履歴詳細 -->
+            <div class="mt-4">
+                <div>
+                    <div class="highlight" style="align-items: end;">
+                        <span style="font-size: 1.5em; font-weight: bold;">依頼No.{{irai.irai_num}}</span>　（依頼日時：{{irai.irai_day}}）
+                    </div>
+                    <div style="margin-top: 10px;">所属：{{irai.shozoku}}</div>
+                    <div style="margin-top: 5px;">担当：{{irai.tantou}}</div>
+
+                    {% if irai.irai_type == 0 or irai.irai_type == 2 %}
+                    <div class="flex2">
+                        <div class="point" style="margin-top: 50px; width: 200px;">
+                            <span class="box-title">
+                                {% if irai.hassou_type == 1 %}
+                                    通常便
+                                {% elif irai.hassou_type == 2 %}
+                                    お急ぎ便
+                                {% elif irai.hassou_type == 3 %}
+                                    当日発送
+                                {% endif %}
+                            </span>
+                            <span style="font-size: 1.2em;">{{irai.hassou_day}}</span>
+                        </div>
+                        <div style="margin-left: 30px;">
+                            <button type="button" class="btn btn-outline-danger">当日出荷に変更</button>
+                        </div>
+                    </div>
+                    {% endif %}     
+
+                </div>
+                
+                <!-- 商品 -->
+                <div style="margin-top: 30px;">
+                    <table class="table table-bordered" style="font-size: 0.9em; width: 900px;">
+                        <thead>
+                            <tr class="table-secondary"><td colspan="6">■ 商品一覧</td></tr>
+                            <tr>
+                                <th>品番</th>
+                                <th>品名</th>
+                                <th>カラー</th>
+                                <th>サイズ</th>
+                                <th>数量</th>
+                                <th>拠点</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in shouhin_list %}
+                            <tr>
+                                <td style="vertical-align: middle;">{{i.shouhin_num}}</td>
+                                <td style="vertical-align: middle;">{{i.shouhin_name}}</td>
+                                <td style="vertical-align: middle;">{{i.color}}</td>
+                                <td style="vertical-align: middle;">{{i.size}}</td>
+                                <td style="vertical-align: middle;">{{i.kazu}}</td>
+                                <td style="vertical-align: middle;">{{i.place}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 詳細 -->
+                <div style="margin-top: 30px;">
+                    <table class="table table-bordered" style="font-size: 0.9em; width: 600px;">
+                        <tr class="table-secondary"><td colspan="2">■ 依頼詳細</td></tr>
+                        <!-- 在庫出荷 -->
+                        {% if irai.irai_type == 0 %}
+                            <tr>
+                                <td style="width: 200px;">内容</td>
+                                <td>在庫出荷</td>
+                            </tr>
+                            {% if irai.zaiko_type == "kakou" %}
+                                <tr>
+                                    <td>商品の種類</td>
+                                    <td>加工あり</td> 
+                                </tr>
+                                <tr>
+                                    <td>加工場 / 店舗</td>
+                                    <td>{{irai.zaiko_kakouba}}</td>
+                                </tr>
+                                <tr>
+                                    <td>柄名</td>
+                                    <td>{{irai.zaiko_gara}}</td>
+                                </tr>
+                            {% elif irai.zaiko_type == "muji" %}
+                                <tr>
+                                    <td>商品の種類</td>
+                                    <td>無地</td> 
+                                </tr>
+                                <tr>
+                                    <td>顧客名</td>
+                                    <td>{{irai.zaiko_cus}}</td>
+                                </tr>
+                                <tr>
+                                    <td>システム発送日</td>
+                                    <td>{{irai.zaiko_system}}</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <td>連絡事項</td>
+                                <td>{{irai.bikou}}</td>
+                            </tr>
+
+                        <!-- キープ -->
+                        {% elif irai.irai_type == 1 %}
+                            <tr>
+                                <td style="width: 200px;">内容</td>
+                                <td>キープ</td>
+                            </tr>
+                            <tr>
+                                <td>顧客名</td>
+                                <td>{{irai.keep_cus}}</td>
+                            </tr>
+                        
+                        <!-- カタログ発送 -->
+                        {% elif irai.irai_type == 2 %}
+                            <tr>
+                                <td style="width: 200px;">内容</td>
+                                <td>カタログ発送</td>
+                            </tr>
+                            {% if irai.catalog_type == "tempo" %}
+                                <tr>
+                                    <td>発送先</td>
+                                    <td>店舗あて</td> 
+                                </tr>
+                                <tr>
+                                    <td>店舗名</td>
+                                    <td>{{irai.catalog_tempo}}</td>
+                                </tr>
+                            {% elif irai.catalog_type == "cus" %}
+                                <tr>
+                                    <td>発送先</td>
+                                    <td>顧客あて</td> 
+                                </tr>
+                                <tr>
+                                    <td>会社名</td>
+                                    <td>{% if irai.catalog_cus_com %}{{irai.catalog_cus_com}}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>氏名</td>
+                                    <td>{{irai.catalog_cus_name}}</td>
+                                </tr>
+                                <tr>
+                                    <td>郵便番号</td>
+                                    <td>{{irai.catalog_cus_yubin}}</td>
+                                </tr>
+                                <tr>
+                                    <td>住所</td>
+                                    <td>{{irai.catalog_cus_pref}}{{irai.catalog_cus_city}}{{irai.catalog_cus_banchi}}</td>
+                                </tr>
+                                <tr>
+                                    <td>建物名</td>
+                                    <td>{% if irai.catalog_cus_build %}{{irai.catalog_cus_build}}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>電話番号</td>
+                                    <td>{{irai.catalog_cus_tel}}</td>
+                                </tr>
+                                <tr>
+                                    <td>メールアドレス</td>
+                                    <td>{% if irai.catalog_cus_mail %}{{irai.catalog_cus_mail}}{% endif %}</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <td>連絡事項</td>
+                                <td>{{irai.bikou}}</td>
+                            </tr>
+                        
+                        <!-- 入庫 -->
+                        {% elif irai.irai_type == 3 %}
+                            <tr>
+                                <td style="width: 200px;">内容</td>
+                                <td>入庫</td>
+                            </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                
+                <!-- 発送情報 -->
+                {% if irai.irai_type == 0 or irai.irai_type == 2 %}
+                <div style="margin-top: 30px;">
+                    <table class="table table-bordered" style="font-size: 0.9em; width: 600px;">
+                        <tr class="table-secondary"><td colspan="2">■ 発送情報</td></tr>
+                        <tr>
+                            <td style="width: 200px;">発送完了日</td>
+                            <td>{% if irai.shipped_day %}{{irai.shipped_day}}{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td>運送会社</td>
+                            <td>{% if irai.shipped_com %}{{irai.shipped_com}}{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td>お問い合わせ番号</td>
+                            <td>{% if irai.shipped_num %}{{irai.shipped_num}}{% endif %}</td>
+                        </tr>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+
+            
+        </div>
+    </div>
+
+    <script>
+        
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i <cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+  
+        var csrftoken = getCookie('csrftoken');
+  
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+  
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+        
+
+
+
+
+    </script>
+
+</body>
+</html>

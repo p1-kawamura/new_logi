@@ -80,6 +80,9 @@ class Irai_list(models.Model):
     catalog_cus_tel=models.CharField("カタログ_電話番号",max_length=255,null=True,blank=True)
     catalog_cus_mail=models.CharField("カタログ_メールアドレス",max_length=255,null=True,blank=True)
     bikou=models.TextField("連絡事項",null=True,blank=True)
+    shipped_day=models.DateField("発送完了日",null=True,blank=True,default=None)
+    shipped_com=models.CharField("運送会社",max_length=255,null=True,blank=True)
+    shipped_num=models.CharField("お問い合わせ番号",max_length=255,null=True,blank=True)
     
     def __str__(self):
         return str(self.irai_num)

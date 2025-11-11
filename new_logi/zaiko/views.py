@@ -418,17 +418,23 @@ def irai_send_all(request):
             ins.available -= kazu
         ins.save()
 
-
     d={}
     return JsonResponse(d)
 
 
 # 依頼履歴_一覧
 def rireki_index(request):
-    return render(request,"zaiko/rireki_list.html")
+    irai_list=Irai_list.objects.all()
+    return render(request,"zaiko/rireki_list.html",{"irai_list":irai_list})
 
 
-
+# 依頼履歴_詳細
+def rireki_detail(request,irai_num):
+    params={
+        "irai":Irai_list.objects.filter(irai_num=irai_num).values()[0],
+        "shouhin_list":Irai_detail.objects.filter(irai_num=irai_num).values(),
+    }
+    return render(request,"zaiko/rireki_index.html",params)
 
 
 
