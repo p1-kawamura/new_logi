@@ -59,31 +59,72 @@
     margin-left: 5px;
     font-size: 1.2em;
 }
-.highlight {
+/* .irai_num_title {
   text-decoration: underline;
   text-decoration-thickness: 0.5em;
   text-decoration-color: #ffff80;
   text-underline-offset: -0.2em;
   text-decoration-skip-ink: none;
+} */
+
+.irai_num_title {
+  position: relative;
+  padding-left: 25px;
 }
+.irai_num_title:before {
+  position: absolute;
+  content: '';
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 0;
+  border: none;
+  border-left: solid 15px transparent;
+  border-bottom: solid 15px #ff8000;
+}
+.irai_num_title:after {
+  position: absolute;
+  content: '';
+  bottom: -3px;
+  left: 10px;
+  width: 100%;
+  border-bottom: solid 3px #ff8000;
+}
+
 .point {
     position: relative;
-    margin: 2em 0;
+    /* margin: 2em 0; */
     padding: 0.5em 1em;
-    border: solid 3px  #f75f58;
+}
+.point_1 {
+    border: solid 2px  #808080;
+}
+.point_2 {
+    border: solid 2px  #ff80c0;
+}
+.point_3 {
+    border: solid 2px  #ff0000;
 }
 .point .box-title {
     position: absolute;
     display: inline-block;
     top: -27px;
-    left: -2.5px;
+    left: -2px;
     padding: 0 9px;
     height: 25px;
     line-height: 25px;
     font-size: 17px;
-    background: #f75f58;
     color: #fff;
     border-radius: 5px 5px 0 0;
+}
+.point .box-title_1 {
+    background: #808080;
+}
+.point .box-title_2 {
+    background: #ff80c0;
+}
+.point .box-title_3 {
+    background: #ff0000;
 }
 
 /* zaiko2 */

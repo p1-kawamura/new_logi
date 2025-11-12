@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -32,32 +33,70 @@
             </div>
 
             <!-- 履歴詳細 -->
-            <div class="mt-4">
-                <div>
-                    <div class="highlight" style="align-items: end;">
-                        <span style="font-size: 1.5em; font-weight: bold;">依頼No.{{irai.irai_num}}</span>　（依頼日時：{{irai.irai_day}}）
+            <div class="mt-4" style="width: 900px;">
+                <div class="flex3" style="align-items: end;">
+                    <div>
+                        <div class="irai_num_title" style="align-items: end;">
+                            <span style="font-size: 1.5em; font-weight: bold;">依頼No.<span id="irai_num">{{irai.irai_num}}</span></span>　（依頼日時：{{irai.irai_day}}）
+                        </div>
+                        <div class="flex2 mt-2" style="align-items: end;">
+                            <div>
+                                <div style="margin-top: 10px;">所属：{{irai.shozoku}}</div>
+                                <div style="margin-top: 5px;">担当：{{irai.tantou}}</div>
+                                <div style="margin-top: 5px;">
+                                    状態：
+                                    {% if irai.irai_status == 0 %}
+                                        発送待ち
+                                    {% elif irai.irai_status == 1 %}
+                                        キープ中
+                                    {% elif irai.irai_status == 2 %}
+                                        発送済
+                                    {% elif irai.irai_status == 3 %}
+                                        キャンセル <span style="font-size: 0.9em;">（{{irai.cancel_day}}）</span>
+                                    {% elif irai.irai_status == 4 %}
+                                        キープ自動解除<span style="font-size: 0.9em;">（{{irai.cancel_day}}）</span>
+                                    {% elif irai.irai_status == 5 %}
+                                        入庫済
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- 発送待ちかキープ中のみ -->
+                            {% if irai.irai_status == 0 or irai.irai_status == 1 %}
+                            <div style="margin-left: 50px;">
+                                <button type="button" class="btn btn-outline-secondary" onclick="irai_cancel()">キャンセル</button>
+                            </div>
+                            {% endif %}
+                        </div>  
                     </div>
-                    <div style="margin-top: 10px;">所属：{{irai.shozoku}}</div>
-                    <div style="margin-top: 5px;">担当：{{irai.tantou}}</div>
 
+                    <!-- 在庫出荷とカタログ発送のみ -->
                     {% if irai.irai_type == 0 or irai.irai_type == 2 %}
-                    <div class="flex2">
-                        <div class="point" style="margin-top: 50px; width: 200px;">
-                            <span class="box-title">
-                                {% if irai.hassou_type == 1 %}
-                                    通常便
-                                {% elif irai.hassou_type == 2 %}
-                                    お急ぎ便
-                                {% elif irai.hassou_type == 3 %}
-                                    当日発送
+                        <div class="flex2" style="margin-left: 50px; align-items: end;">
+                            <!-- 発送待ちのみ -->
+                            {% if irai.irai_status == 0 %}
+
+                                {% if irai.hassou_type != 3 %}
+                                <div>
+                                    <button type="submit" class="btn btn-danger" onclick="change_today()">当日出荷に変更</button>
+                                </div>
                                 {% endif %}
-                            </span>
-                            <span style="font-size: 1.2em;">{{irai.hassou_day}}</span>
+                            
+                                {% if irai.hassou_type == 1 %}
+                                <div class="point point_1" style="margin-top: 50px; margin-left: 30px; width: 240px;">
+                                    <span class="box-title box-title_1">通常便
+                                {% elif irai.hassou_type == 2 %}
+                                <div class="point point_2" style="margin-top: 50px; margin-left: 30px; width: 240px;">
+                                    <span class="box-title box-title_2">お急ぎ便
+                                {% elif irai.hassou_type == 3 %}
+                                <div class="point point_3" style="margin-top: 50px; margin-left: 30px; width: 240px;">
+                                    <span class="box-title box-title_3">当日出荷
+                                {% endif %}
+                                    </span>
+                                    <span style="font-size: 1.2em;">{{irai.hassou_day}}（{{irai.hassou_day | weekday_jp}}）</span>
+                                </div>
+
+                            {% endif %}
                         </div>
-                        <div style="margin-left: 30px;">
-                            <button type="button" class="btn btn-outline-danger">当日出荷に変更</button>
-                        </div>
-                    </div>
                     {% endif %}     
 
                 </div>
@@ -99,7 +138,20 @@
                         {% if irai.irai_type == 0 %}
                             <tr>
                                 <td style="width: 200px;">内容</td>
-                                <td>在庫出荷</td>
+                                <td style="font-weight: bold;">在庫出荷</td>
+                            </tr>
+                            <tr>
+                                <td>出荷日選択</td>
+                                <td>
+                                    {% if irai.hassou_type == 1 %}
+                                        通常便
+                                    {% elif irai.hassou_type == 2 %}
+                                        お急ぎ便
+                                    {% elif irai.hassou_type == 3 %}
+                                        当日出荷
+                                    {% endif %}
+                                    　{{irai.hassou_day}}（{{irai.hassou_day | weekday_jp}}）
+                                </td>
                             </tr>
                             {% if irai.zaiko_type == "kakou" %}
                                 <tr>
@@ -130,14 +182,19 @@
                             {% endif %}
                             <tr>
                                 <td>連絡事項</td>
-                                <td>{{irai.bikou}}</td>
+                                <td>{{irai.bikou | linebreaksbr}}</td>
                             </tr>
 
                         <!-- キープ -->
                         {% elif irai.irai_type == 1 %}
                             <tr>
                                 <td style="width: 200px;">内容</td>
-                                <td>キープ</td>
+                                <td style="font-weight: bold;">
+                                    キープ
+                                    {% if irai.irai_status == 1 %}
+                                    <button type="button" class="btn btn-success btn-sm" style="margin-left: 20px;" onclick="keep_to_hassou()">発送に変更</button>
+                                    {% endif %}
+                                </td>
                             </tr>
                             <tr>
                                 <td>顧客名</td>
@@ -148,7 +205,20 @@
                         {% elif irai.irai_type == 2 %}
                             <tr>
                                 <td style="width: 200px;">内容</td>
-                                <td>カタログ発送</td>
+                                <td style="font-weight: bold;">カタログ発送</td>
+                            </tr>
+                            <tr>
+                                <td>出荷日選択</td>
+                                <td>
+                                    {% if irai.hassou_type == 1 %}
+                                        通常便
+                                    {% elif irai.hassou_type == 2 %}
+                                        お急ぎ便
+                                    {% elif irai.hassou_type == 3 %}
+                                        当日出荷
+                                    {% endif %}
+                                    　{{irai.hassou_day}}（{{irai.hassou_day | weekday_jp}}）
+                                </td>
                             </tr>
                             {% if irai.catalog_type == "tempo" %}
                                 <tr>
@@ -195,7 +265,7 @@
                             {% endif %}
                             <tr>
                                 <td>連絡事項</td>
-                                <td>{{irai.bikou}}</td>
+                                <td>{{irai.bikou | linebreaksbr}}</td>
                             </tr>
                         
                         <!-- 入庫 -->
@@ -268,6 +338,58 @@
         });
         
 
+        // 当日出荷に変更
+        function change_today(){
+            var ans=confirm("当日出荷に変更しますか？");
+            if (ans){
+                $.ajax({
+                    'url': '{% url "zaiko:irai_change_today" %}',
+                    'type': 'POST',
+                    'data': {"irai_num":document.getElementById("irai_num").innerText},
+                    'dataType': 'json'
+                })
+                .done(function(response){
+                    window.location.reload();
+                    window.alert("当日出荷に変更しました！"); 
+                });
+            } 
+        };
+       
+
+        // キャンセル
+        function irai_cancel(){
+            var ans=confirm("本当にキャンセルしますか？");
+            if (ans){
+                $.ajax({
+                    'url': '{% url "zaiko:irai_cancel" %}',
+                    'type': 'POST',
+                    'data': {"irai_num":document.getElementById("irai_num").innerText},
+                    'dataType': 'json'
+                })
+                .done(function(response){
+                    window.location.reload();
+                    window.alert("依頼をキャンセルしました！");         
+                });
+            } 
+        };
+
+
+        // キープから発送
+        function keep_to_hassou(){
+            var ans=confirm("依頼リストに商品が追加されます。\n\nこのキープ自体は解除されますが、続行しますか？");
+            if (ans){
+                $.ajax({
+                    'url': '{% url "zaiko:irai_keep_hassou" %}',
+                    'type': 'POST',
+                    'data': {"irai_num":document.getElementById("irai_num").innerText},
+                    'dataType': 'json'
+                })
+                .done(function(response){
+                    window.location.href="{% url 'zaiko:index' %}";
+                    window.alert("依頼リストに商品を追加します。\n\n続けて必要項目を入力してください。");         
+                });
+            } 
+        };
 
 
 

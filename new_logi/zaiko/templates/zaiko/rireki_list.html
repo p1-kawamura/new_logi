@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -13,7 +14,7 @@
     <title>物流在庫_履歴一覧</title>
 </head>
 <body>
-    <div class="mt-3 mb-5">
+    <div class="mt-3">
 
         <div style="margin: 0 auto; width: 1100px;">
 
@@ -110,18 +111,18 @@
                                     {% if i.irai_type == 0 %}
                                         在庫出荷<br>
                                         {% if i.zaiko_type == "kakou" %}
-                                            加工あり
+                                            （加工あり）
                                         {% elif i.zaiko_type == "muji" %}
-                                            無地
+                                            （無地）
                                         {% endif %}
                                     {% elif i.irai_type == 1 %}
                                         キープ
                                     {% elif i.irai_type == 2 %}
                                         カタログ発送<br>
                                         {% if i.catalog_type == "tempo" %}
-                                            店舗あて
+                                            （店舗あて）
                                         {% elif i.catalog_type == "cus" %}
-                                            顧客あて
+                                            （顧客あて）
                                         {% endif %}
                                     {% elif i.irai_type == 3 %}
                                         入庫
@@ -140,33 +141,38 @@
                                         {% if i.catalog_type == "tempo" %}
                                             {{i.catalog_tempo}}
                                         {% elif i.catalog_type == "cus" %}
-                                            {{i.catalog_cus_com}}<br>{{i.catalog_cus_name}}
+                                            {{i.catalog_cus_name}}
                                         {% endif %}
                                     {% endif %}
                                 </td>
+                                {% if i.hassou_type == 3 and i.irai_status == 0 %}
+                                <td style="color: #ff0000; background-color: #ffe1e1; white-space: nowrap;">
+                                {% else %}
                                 <td style="white-space: nowrap;">
-                                    {% if i.irai_type == 0 or i.irai_type == 2 %}
-                                        {% if i.hassou_type == 1 %}
-                                            通常便
-                                        {% elif i.hassou_type == 2 %}
-                                            お急ぎ便
-                                        {% elif i.hassou_type == 3 %}
-                                            当日出荷
-                                        {% endif %}
-                                        <br>{{i.hassou_day}}
-                                    {% endif %}
+                                {% endif %}
+                                    {% if i.hassou_type == 1 %}
+                                        通常便<br>{{i.hassou_day}}（{{i.hassou_day | weekday_jp}}）                                        
+                                    {% elif i.hassou_type == 2 %}
+                                        お急ぎ便<br>{{i.hassou_day}}（{{i.hassou_day | weekday_jp}}）
+                                    {% elif i.hassou_type == 3 %}
+                                        当日出荷<br>{{i.hassou_day}}（{{i.hassou_day | weekday_jp}}）
+                                    {% endif %}                                                                        
                                 </td>
                                 <td style="vertical-align: middle; text-align: center;">
                                     {% if i.irai_status == 0 %}
-                                        <form action="" method="post">{% csrf_token %}
+                                        <form action="{% url 'zaiko:rireki_detail' i.irai_num %}" method="post">{% csrf_token %}
                                             <button type="submit" class="btn btn-success btn-sm">発送待ち</button>
                                         </form>
                                     {% elif i.irai_status == 1 %}
-                                        -
+                                        〇
                                     {% elif i.irai_status == 2 %}
                                         <span style="color: blue"><span style="font-size: 1.3em;"><i class="bi bi-truck"></i></span> 発送済</span>
                                     {% elif i.irai_status == 3 %}
                                         キャンセル
+                                    {% elif i.irai_status == 4 %}
+                                        ×
+                                    {% elif i.irai_status == 5 %}
+                                        -
                                     {% endif %}
                                 </td>
                             </tr>
@@ -176,11 +182,27 @@
                 </div>
             </div>
 
-            
-
         </div>
+
+        
     </div>
 
+
+    <!-- ページネーション -->
+    <div class="flex mt-3 mb-5">
+        <div>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination mt-4">
+                <li class="page-item"><a class="page-link" href="{% url 'zaiko:page_first' %}">最初へ</a></li>
+                <li class="page-item"><a class="page-link" href="{% url 'zaiko:page_prev' %}">前へ</a></li>
+                <li class="page-item"><a class="page-link" pointer-events: none;>{{num}}/{{all_num}}</a></li>               
+                <li class="page-item"><a class="page-link" href="{% url 'zaiko:page_next' %}">次へ</a></li>
+                <li class="page-item"><a class="page-link" href="{% url 'zaiko:page_last' %}">最後へ</a></li> 
+                </ul>
+            </nav>
+        </div>
+    </div>
+    
 
     <!-- 各種Ajax -->
     <script>

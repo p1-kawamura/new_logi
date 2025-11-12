@@ -142,7 +142,7 @@
                         <button type="button" class="btn btn-outline-dark" id="irai_zaiko" name="btn_irai" style="width: 200px;">物流在庫出荷</button>
                     </div>
                     <div style="margin-left: 50px;">
-                        <button type="button" class="btn btn-outline-dark" id="irai_keep" name="btn_irai" style="width: 200px;">キープ</button>                       
+                        <button type="button" class="btn btn-outline-dark" id="irai_keep" name="btn_irai" style="width: 200px;">キープ（2週間）</button>                       
                     </div>
                     <div style="margin-left: 50px;">
                         <button type="button" class="btn btn-outline-dark" id="irai_catalog" name="btn_irai" style="width: 200px;">カタログ発送</button>
@@ -1090,8 +1090,8 @@
                         'dataType': 'json'
                     })
                     .done(function(response){
-                        
-                        
+                        window.location.href="./rireki_detail/" + response.irai_num;
+                        window.alert("依頼が完了しました！");
                     });
                 }  
             });  
@@ -1139,8 +1139,8 @@
                         'dataType': 'json'
                     })
                     .done(function(response){
-                        
-                        
+                        window.location.href="./rireki_detail/" + response.irai_num;
+                        window.alert("依頼が完了しました！");                        
                     });
                 }  
             });  
@@ -1237,8 +1237,8 @@
                         'dataType': 'json'
                     })
                     .done(function(response){
-                        
-                        
+                        window.location.href="./rireki_detail/" + response.irai_num;
+                        window.alert("依頼が完了しました！");                        
                     });
                 }  
             });            

@@ -83,12 +83,13 @@ class Irai_list(models.Model):
     shipped_day=models.DateField("発送完了日",null=True,blank=True,default=None)
     shipped_com=models.CharField("運送会社",max_length=255,null=True,blank=True)
     shipped_num=models.CharField("お問い合わせ番号",max_length=255,null=True,blank=True)
+    cancel_day=models.CharField("キャンセル日時",max_length=255,null=True,blank=True)
     
     def __str__(self):
         return str(self.irai_num)
     
     # irai_type（依頼内容）　0:在庫出荷　1:キープ　2:カタログ発送　3:入庫
-    # irai_status（状態）　0:発送待ち　1:キープ中　2:発送済　3:キャンセル
+    # irai_status（状態）　0:発送待ち　1:キープ中　2:発送済　3:キャンセル　4:キープ解除
     # hassou_type（発送タイプ）　0:なし（キープ/入庫） 1:通常便　2:お急ぎ便　3:当日出荷
     
 

@@ -38,6 +38,10 @@ def index(request):
         request.session["zaiko"]["place"]="物流センター"
     if "items" not in request.session["zaiko"]:
         request.session["zaiko"]["items"]=[]
+    if "page_num" not in request.session["zaiko"]:
+        request.session["zaiko"]["page_num"]=1
+    if "all_page_num" not in request.session["zaiko"]:
+        request.session["zaiko"]["all_page_num"]=""
     
     shozoku_list=Shozoku.objects.all()
     ses_item_list=request.session["zaiko"]["items"]
@@ -418,14 +422,61 @@ def irai_send_all(request):
             ins.available -= kazu
         ins.save()
 
-    d={}
+    request.session["zaiko"]["items"]=[]
+
+    d={"irai_num":irai_num}
     return JsonResponse(d)
 
 
 # 依頼履歴_一覧
 def rireki_index(request):
-    irai_list=Irai_list.objects.all()
-    return render(request,"zaiko/rireki_list.html",{"irai_list":irai_list})
+    irai_list=Irai_list.objects.all().order_by("irai_num").reverse()
+
+    #全ページ数
+    if irai_list.count()==0:
+        all_num=1
+    elif irai_list.count() % 30== 0:
+        all_num=irai_list.count() / 30
+    else:
+        all_num=irai_list.count() // 30 + 1
+    all_num=int(all_num)
+    request.session["zaiko"]["all_page_num"]=all_num
+    num=request.session["zaiko"]["page_num"]
+    irai_list=irai_list[(num-1)*30 : num*30]
+
+    params={
+        "irai_list":irai_list,
+        "num":num,
+        "all_num":all_num,
+    }
+    return render(request,"zaiko/rireki_list.html",params)
+
+
+# ページネーション_前へ
+def page_prev(request):
+    num=request.session["zaiko"]["page_num"]
+    if num-1 > 0:
+        request.session["zaiko"]["page_num"] = num - 1
+    return redirect("zaiko:rireki_index")
+
+# ページネーション_最初
+def page_first(request):
+    request.session["zaiko"]["page_num"] = 1
+    return redirect("zaiko:rireki_index")
+
+# ページネーション_次へ
+def page_next(request):
+    num=request.session["zaiko"]["page_num"]
+    all_num=request.session["zaiko"]["all_page_num"]
+    if num+1 <= all_num:
+        request.session["zaiko"]["page_num"] = num + 1
+    return redirect("zaiko:rireki_index")
+
+# ページネーション_最後
+def page_last(request):
+    all_num=request.session["zaiko"]["all_page_num"]
+    request.session["zaiko"]["page_num"]=all_num
+    return redirect("zaiko:rireki_index")
 
 
 # 依頼履歴_詳細
@@ -437,8 +488,60 @@ def rireki_detail(request,irai_num):
     return render(request,"zaiko/rireki_index.html",params)
 
 
+# 当日出荷に変更
+def irai_change_today(request):
+    irai_num=request.POST.get("irai_num")
+    ins=Irai_list.objects.get(irai_num=irai_num)
+    ins.hassou_type=3
+    ins.hassou_day=datetime.today()
+    ins.save()
+    d={}
+    return JsonResponse(d)
 
 
+# 依頼キャンセル
+def irai_cancel(request):
+    irai_num=request.POST.get("irai_num")
+    ins=Irai_list.objects.get(irai_num=irai_num)
+    ins.irai_status=3
+    ins.cancel_day=datetime.now().strftime("%Y年%m月%d日 %H:%M")
+    ins.save()
+
+    # 在庫を戻す
+    shouhin_list=Irai_detail.objects.filter(irai_num=irai_num)
+    for i in shouhin_list:
+        ins2=Shouhin.objects.get(hontai_num=i.hontai_num)
+        if ins.irai_type in [0,2]:
+            ins2.available += i.kazu
+        elif ins.irai_type==1:
+            ins2.available += i.kazu
+            ins2.keep -= i.kazu
+        ins2.save()
+
+    d={}
+    return JsonResponse(d)
+
+
+# キープから発送
+def irai_keep_hassou(request):
+    irai_num=request.POST.get("irai_num")
+    ins=Irai_list.objects.get(irai_num=irai_num)
+    ins.irai_status=3
+    ins.cancel_day=datetime.now().strftime("%Y年%m月%d日 %H:%M")
+    ins.save()
+
+    # キャンセル扱いにして、在庫を戻す
+    shouhin_list=Irai_detail.objects.filter(irai_num=irai_num)
+    ses_item=[]
+    for i in shouhin_list:
+        ins2=Shouhin.objects.get(hontai_num=i.hontai_num)
+        ins2.available += i.kazu
+        ins2.keep -= i.kazu
+        ins2.save()
+        ses_item.append(str(i.hontai_num) + "_" + str(i.kazu))
+    request.session["zaiko"]["items"]=ses_item
+    d={}
+    return JsonResponse(d)
 
 
 
