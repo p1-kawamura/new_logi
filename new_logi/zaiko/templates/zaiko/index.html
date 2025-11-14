@@ -23,6 +23,7 @@
                 <div style="margin-left: 50px;"><a href="{% url 'zaiko:rireki_index' %}">履歴一覧</a></div>
                 <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
                 <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:nyuuko_index' %}">入庫</a></div>
             </div>
             <hr>
         
@@ -722,7 +723,8 @@
                             'hinban': dic.hinban,
                             'color':dic.color,
                             'size':dic.size,
-                            'place':this.value
+                            'place':this.value,
+                            'modal_type':"zaiko",
                             },
                         'dataType': 'json'
                     })
@@ -787,7 +789,8 @@
                     'item_list': item_lists,
                     'hinban':dic.hinban,
                     'color':dic.color,
-                    'size':dic.size
+                    'size':dic.size,
+                    'modal_type':"zaiko",
                 },
                 'dataType': 'json'
             })
@@ -849,7 +852,10 @@
                         $.ajax({
                             'url': '{% url "zaiko:item_del" %}',
                             'type': 'POST',
-                            'data': {'hontai_kazu': this.id},                                
+                            'data': {
+                                'hontai_kazu': this.id,
+                                'modal_type':"zaiko",
+                            },                                
                             'dataType': 'json'
                         })
                         .done(function(response){

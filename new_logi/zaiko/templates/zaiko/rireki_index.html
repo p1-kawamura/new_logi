@@ -36,7 +36,7 @@
             <div class="mt-4" style="width: 900px;">
                 <div class="flex3" style="align-items: end;">
                     <div>
-                        <div class="irai_num_title" style="align-items: end;">
+                        <div class="irai_title" style="align-items: end;">
                             <span style="font-size: 1.5em; font-weight: bold;">依頼No.<span id="irai_num">{{irai.irai_num}}</span></span>　（依頼日時：{{irai.irai_day}}）
                         </div>
                         <div class="flex2 mt-2" style="align-items: end;">
@@ -122,7 +122,7 @@
                                 <td style="vertical-align: middle;">{{i.shouhin_name}}</td>
                                 <td style="vertical-align: middle;">{{i.color}}</td>
                                 <td style="vertical-align: middle;">{{i.size}}</td>
-                                <td style="vertical-align: middle;">{{i.kazu}}</td>
+                                <td style="vertical-align: middle; text-align: right;">{{i.kazu}}</td>
                                 <td style="vertical-align: middle;">{{i.place}}</td>
                             </tr>
                             {% endfor %}

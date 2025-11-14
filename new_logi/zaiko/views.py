@@ -42,6 +42,12 @@ def index(request):
         request.session["zaiko"]["page_num"]=1
     if "all_page_num" not in request.session["zaiko"]:
         request.session["zaiko"]["all_page_num"]=""
+    if "place2" not in request.session["zaiko"]:
+        request.session["zaiko"]["place2"]="物流センター"
+    if "items2" not in request.session["zaiko"]:
+        request.session["zaiko"]["items2"]=[]
+    if "rireki_search" not in request.session["zaiko"]:
+        request.session["zaiko"]["rireki_search"]={}
     
     shozoku_list=Shozoku.objects.all()
     ses_item_list=request.session["zaiko"]["items"]
@@ -197,7 +203,11 @@ def place_click(request):
     request.session["zaiko"]["place"]=place
     place_ok=list(Place.objects.filter(show=1))
     place_list=list(Shouhin.objects.filter(shouhin_set=hinban,place__in=place_ok).values_list("place",flat=True).distinct())
-    ses_item_list=request.session["zaiko"]["items"]
+    modal_type=request.POST.get("modal_type")
+    if modal_type == "zaiko":
+        ses_item_list=request.session["zaiko"]["items"]
+    else:
+        ses_item_list=request.session["zaiko"]["items2"]
     d={
         "item_list":item_list(hinban,color,size,place),
         "place_list":place_list,
@@ -216,12 +226,22 @@ def item_add(request):
     color=json.loads(color)
     size=request.POST.get("size")
     size=json.loads(size)
-    ses_item_list=request.session["zaiko"]["items"]
-    place=request.session["zaiko"]["place"]
+    modal_type=request.POST.get("modal_type")
+
+    if modal_type == "zaiko":
+        ses_item_list=request.session["zaiko"]["items"]
+        place=request.session["zaiko"]["place"]
+    else:
+        ses_item_list=request.session["zaiko"]["items2"]
+        place=request.session["zaiko"]["place2"]
 
     for i in item_lists:
         ses_item_list.append(i)
-    request.session["zaiko"]["items"]=ses_item_list
+
+    if modal_type == "zaiko":
+        request.session["zaiko"]["items"]=ses_item_list
+    else:
+        request.session["zaiko"]["items2"]=ses_item_list
 
     d={
         "order_list":order_item_list(ses_item_list),
@@ -242,6 +262,7 @@ def order_item_list(ses_item_list):
         else:
             zaiko="ok"
         dic={
+            "hontai_num":hontai,
             "hinban":ins.shouhin_num,
             "hinmei":ins.shouhin_name,
             "color":ins.color,
@@ -303,11 +324,17 @@ def csv_item_add(request):
 # 依頼商品一覧から削除
 def item_del(request):
     hontai_kazu=request.POST.get("hontai_kazu").replace("order_","")
-    ses_item_list=request.session["zaiko"]["items"]
-    ses_item_list.remove(hontai_kazu)
-    request.session["zaiko"]["items"]=ses_item_list
-    order_list=order_item_list(ses_item_list)
+    modal_type=request.POST.get("modal_type")
+    if modal_type=="zaiko":
+        ses_item_list=request.session["zaiko"]["items"]
+        ses_item_list.remove(hontai_kazu)
+        request.session["zaiko"]["items"]=ses_item_list
+    else:
+        ses_item_list=request.session["zaiko"]["items2"]
+        ses_item_list.remove(hontai_kazu)
+        request.session["zaiko"]["items2"]=ses_item_list
 
+    order_list=order_item_list(ses_item_list)
     d={"order_list":order_list}
     return JsonResponse(d)
 
@@ -387,6 +414,7 @@ def irai_send_all(request):
             catalog_cus_banchi=dic["cus_dic"]["cat_banchi"],
             catalog_cus_build=dic["cus_dic"]["cat_build"],
             catalog_cus_tel=dic["cus_dic"]["cat_tel"],
+            catalog_cus_tel_search=dic["cus_dic"]["cat_tel"].replace("-","").strip(),
             catalog_cus_mail=dic["cus_dic"]["cat_mail"],
             bikou=dic["bikou"],
         )
@@ -430,7 +458,26 @@ def irai_send_all(request):
 
 # 依頼履歴_一覧
 def rireki_index(request):
-    irai_list=Irai_list.objects.all().order_by("irai_num").reverse()
+    shozoku_list=Shozoku.objects.all()
+    ses=request.session["zaiko"]["rireki_search"]
+    print(ses)
+
+    # フィルター
+    if len(ses)==0:
+        irai_list=Irai_list.objects.all().order_by("irai_num").reverse()
+    else:
+        fil={}
+        if ses["sr_irai_num"] != "":
+            fil["irai_num"]=ses["sr_irai_num"]
+        
+        # if ses["cus_tel"] != "":
+        #     tel=ses["cus_tel"].strip().replace("-","")
+        #     ins_tel=list(Customer.objects.filter(tel_search=tel).values_list("cus_id",flat=True))
+        #     ins_mob=list(Customer.objects.filter(tel_mob_search=tel).values_list("cus_id",flat=True))
+        #     list_tel_mob=set(ins_tel + ins_mob)
+        #     fil["cus_id__in"]=list_tel_mob
+
+        irai_list=Irai_list.objects.filter(**fil).order_by("irai_num").reverse()
 
     #全ページ数
     if irai_list.count()==0:
@@ -446,10 +493,18 @@ def rireki_index(request):
 
     params={
         "irai_list":irai_list,
+        "shozoku_list":shozoku_list,
         "num":num,
         "all_num":all_num,
     }
     return render(request,"zaiko/rireki_list.html",params)
+
+
+# 履歴一覧_検索
+def rireki_search(request):
+    form_data = {key: value for key, value in request.POST.items()}
+    request.session["zaiko"]["rireki_search"]=form_data
+    return redirect("zaiko:rireki_index")
 
 
 # ページネーション_前へ

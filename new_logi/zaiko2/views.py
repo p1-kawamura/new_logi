@@ -1,12 +1,18 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
-from zaiko.models import Shouhin,Size,Place
+from zaiko.models import Shouhin,Size,Place,Irai_list,Irai_detail
 import datetime
 from django.http import JsonResponse
 import io
 import csv
 import json
 from django.db.models import Max
+from zaiko.views import order_item_list
+import pandas as pd
+from io import BytesIO
+from django.http import HttpResponse
+from django_pandas.io import read_frame
+import openpyxl
 
 
 # 編集画面
@@ -75,7 +81,7 @@ def size_index(request):
 
 
 # サイズ番号（順番）
-def size_num(request):
+def size_num_func(request):
     size_list=request.POST.get("size_list")
     size_list=json.loads(size_list)
     li=[]
@@ -151,3 +157,103 @@ def size_same(request):
     d={"size_same_list":size_same_list}
     return JsonResponse(d)
 
+
+# 入庫画面
+def nyuuko_index(request):
+    ses_item_list=request.session["zaiko"]["items2"]
+    order_list=order_item_list(ses_item_list)
+    return render(request,"zaiko2/nyuuko.html",{"order_list":order_list})
+
+
+# 入庫用エクセル_download
+def excel_download(request):
+    ins=Shouhin.objects.all()
+    df=read_frame(ins)
+    df=df[["hontai_num","place","shouhin_num","shouhin_name","color","size"]]
+    df["stocking"]=0
+
+    # Excelファイルをメモリ上に作成
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='入庫専用')
+
+    buffer.seek(0)
+
+    # HTTPレスポンスとしてExcelファイルを返す
+    response = HttpResponse(
+        buffer,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="stocking.xlsx"'
+    return response
+
+
+# 入庫用エクセル_import
+def excel_import(request):
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        wb = openpyxl.load_workbook(excel_file)
+        sheet = wb.active
+        ses_item_list=request.session["zaiko"]["items2"]
+
+        # 2行目からデータを読み込む（1行目はヘッダー）
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            if row[6]>0:
+                ses_item_list.append(str(row[0]) + "_" + str(row[6]))
+        request.session["zaiko"]["items2"]=ses_item_list
+            
+    return redirect("zaiko2:nyuuko_index")
+
+
+# 入庫処理
+def nyuuko_send(request):
+    tantou=request.POST.get("tantou")
+    ses_item_list=request.session["zaiko"]["items2"]
+    if len(ses_item_list)==0:
+        ans="no"
+    else:
+        ans="yes"
+        try:
+            irai_num=Irai_list.objects.all().aggregate(Max("irai_num"))["irai_num__max"] + 1
+        except:
+            irai_num=1
+        
+        ####### Irai_list #######
+        Irai_list.objects.create(
+            irai_num=irai_num,
+            shozoku="本社",
+            tantou=tantou,
+            irai_type=3,
+            irai_status=5,
+        )
+
+        ####### 商品 #######
+        for i in ses_item_list:
+            hontai,kazu=map(int,i.split("_"))
+            ins=Shouhin.objects.get(hontai_num=hontai)
+
+            # Irai_detail
+            Irai_detail.objects.create(
+                irai_num=irai_num,
+                hontai_num=ins.hontai_num,
+                place=ins.place,
+                shouhin_num=ins.shouhin_num,
+                shouhin_name=ins.shouhin_name,
+                color=ins.color,
+                size=ins.size,
+                size_num=ins.size_num,
+                tana=ins.tana,
+                cost_price=ins.cost_price,
+                bikou=ins.bikou,
+                attention=ins.attention,
+                jan_code=ins.jan_code,
+                kazu=kazu,
+            )
+            # Shouhin
+            ins.available += kazu
+            ins.stock += kazu
+            ins.save()
+        request.session["zaiko"]["items2"]=[]
+
+    d={"ans":ans}
+    return JsonResponse(d)

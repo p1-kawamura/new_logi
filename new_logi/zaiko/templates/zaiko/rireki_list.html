@@ -24,57 +24,89 @@
                 <div style="margin-left: 50px;"><a href="{% url 'zaiko:rireki_index' %}">履歴一覧</a></div>
                 <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
                 <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
+                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:nyuuko_index' %}">入庫</a></div>
             </div>
             <hr>
 
 
             <!-- 検索フォーム -->
-            <div class="mt-5">
-                <form action="" method="post">{% csrf_token %}
+            <div class="mt-5" style="font-size: 0.9em;">
+                <form action="{% url 'zaiko:rireki_search' %}" method="post">{% csrf_token %}
                     <div class="flex2">
                         <div>依頼No：</div>
-                        <div><input class="form-control" type="text" name="irai_num" style="width: 100px;"></div>
+                        <div><input class="form-control form-control-sm" type="text" name="sr_irai_num" style="width: 60px;" sr_form></div>
                         <div style="margin-left: 30px;">依頼日：</div>
-                        <div><input class="form-control" type="date" name="rental_day_st"></div>
+                        <div><input class="form-control form-control-sm" type="date" name="sr_irai_day_st" style="width: 120px;" sr_form></div>
                         <div style="margin-left: 10px;">～</div>
-                        <div><input class="form-control" type="date" name="rental_day_ed" style="margin-left: 10px;"></div>
-                        <div style="margin-left: 30px;">内容：</div>
+                        <div><input class="form-control form-control-sm" type="date" name="sr_irai_day_ed" style="width: 120px; margin-left: 10px;" sr_form></div>
+                        <div style="margin-left: 30px;">出荷日：</div>
+                        <div><input class="form-control form-control-sm" type="date" name="sr_hassou_day_st" style="width: 120px;" sr_form></div>
+                        <div style="margin-left: 10px;">～</div>
+                        <div><input class="form-control form-control-sm" type="date" name="sr_hassou_day_ed" style="width: 120px; margin-left: 10px;" sr_form></div>
+                        <div style="margin-left: 30px;">出荷便：</div>
                         <div>
-                            <select class="form-select" name="irai_type">
+                            <select class="form-select form-select-sm" name="sr_hassou_type" sr_form>
                                 <option></option>
-                                <option value="0">顧客あて</option>
-                                <option value="1">店舗あて</option>
-                                <option value="2">キープ</option>
+                                <option value="1">通常便</option>
+                                <option value="2">お急ぎ便</option>
+                                <option value="3">当日出荷</option>
+                            </select>
+                        </div>             
+                    </div>
+                    <div class="flex2 mt-4">
+                        <div>所属：</div>
+                        <div>
+                            <select class="form-select form-select-sm" name="sr_shozoku" sr_form>
+                                <option></option>
+                                {% for i in shozoku_list %}
+                                <option>{{i}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div style="margin-left: 30px;">担当者：</div>
+                        <div><input class="form-control form-control-sm" type="text" name="sr_tantou" style="width: 110px;" sr_form></div>
+                        <div style="margin-left: 30px;">依頼内容：</div>
+                        <div>
+                            <select class="form-select form-select-sm" name="sr_naiyou_1" id="sr_naiyou_1" sr_form>
+                                <option></option>
+                                <option value="0">在庫出荷</option>
+                                <option value="1">キープ</option>
+                                <option value="2">カタログ発送</option>
+                                <option value="3">入庫</option>
+                            </select>
+                        </div>
+                        <div style="margin-left: 10px;">
+                            <select class="form-select form-select-sm" name="sr_naiyou_2" id="sr_naiyou_2" style="width: 100px;">
+                                <option></option>
                             </select>
                         </div>
                         <div style="margin-left: 30px;">状態：</div>
                         <div>
-                            <select class="form-select" name="status">
+                            <select class="form-select form-select-sm" name="sr_status" sr_form>
                                 <option></option>
                                 <option value="0">発送待ち</option>
-                                <option value="1">準備中</option>
-                                <option value="2">発送済</option>
+                                <option value="2">発送済み</option>
+                                <option value="1">キープ中</option>
+                                <option value="4">キープ解除</option>
                                 <option value="3">キャンセル</option>
-                                <option value="5">返却済</option>
+                                <option value="6">準備中</option>
                             </select>
-                        </div>
+                        </div>            
                     </div>
                     <div class="flex2 mt-4">
-                        <div>担当者：</div>
-                        <div><input class="form-control" type="text" name="tantou" style="width: 110px;"></div>
-                        <div style="margin-left: 30px;">顧客会社：</div>
-                        <div><input class="form-control" type="text" name="nouhin_com" style="width: 150px;"></div>
-                        <div style="margin-left: 30px;">顧客氏名：</div>
-                        <div><input class="form-control" type="text" name="nouhin_cus" style="width: 150px;"></div>
+                        <div>顧客/加工場/店舗/柄名：</div>
+                        <div><input class="form-control form-control-sm" type="text" name="sr_cus" style="width: 200px;" sr_form></div>
                         <div style="margin-left: 30px;">電話番号：</div>
-                        <div><input class="form-control" type="text" name="tel" style="width: 150px;"></div>
+                        <div><input class="form-control form-control-sm" type="text" name="sr_tel" style="width: 120px;" sr_form></div>                        
+                        <div style="margin-left: 30px;">メールアドレス：</div>
+                        <div><input class="form-control form-control-sm" type="text" name="sr_mail" style="width: 200px;" sr_form></div>
+
                         <div style="margin-left: 30px;">
-                            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> 検索</button>
+                            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> 検索</button>
                         </div>
-                    </div>
-                    <div class="flex2 mt-4">
-                        <div>メールアドレス：</div>
-                        <div><input class="form-control" type="text" name="mail" style="width: 250px;"></div>
+                        <div style="margin-left: 20px;">
+                            <button type="button" class="btn btn-outline-dark btn-sm" id="btn_clear">クリア</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -89,8 +121,8 @@
                                 <th>依頼No</th>
                                 <th>依頼日</th>
                                 <th>所属 / 担当者</th>
-                                <th>内容①</th>
-                                <th>内容②</th>
+                                <th>依頼内容</th>
+                                <th>入力内容</th>
                                 <th>出荷日</th>
                                 <th style="text-align: center;">状態</th>
                             </tr>
@@ -173,6 +205,8 @@
                                         ×
                                     {% elif i.irai_status == 5 %}
                                         -
+                                    {% elif i.irai_status == 6 %}
+                                        <span style="color: red;"><span style="font-size: 1.3em;"><i class="bi bi-cone-striped"></i></span> 準備中</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -238,6 +272,30 @@
         });
   
 
+        // フォームクリア
+        document.getElementById("btn_clear").addEventListener("click",function(){
+            var sr_form=document.querySelectorAll('[sr_form]');
+            for (var i of sr_form){
+                i.value="";
+            }
+        });
+
+
+        // 内容1_選択
+        var naiyou_1 = document.getElementById("sr_naiyou_1");
+        naiyou_1.addEventListener("change",function(){
+            var str="<option></option>";
+            if (naiyou_1.value == "0"){
+                str="<option></option>" +
+                    "<option value='kakou'>加工あり</option>" +
+                    "<option value='muji'>無地</option>";
+            } else if (naiyou_1.value == "2"){
+                str="<option></option>" +
+                    "<option value='tempo'>店舗あて</option>" +
+                    "<option value='cus'>顧客あて</option>";
+            }
+            document.getElementById("sr_naiyou_2").innerHTML=str;
+        })
         
 
     </script>

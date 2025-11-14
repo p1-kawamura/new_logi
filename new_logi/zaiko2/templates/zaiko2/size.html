@@ -140,7 +140,7 @@
             };
             size_list=JSON.stringify(size_list);
             $.ajax({
-                'url': '{% url "zaiko2:size_num" %}',
+                'url': '{% url "zaiko2:size_num_func" %}',
                 'type': 'POST',
                 'data': {'size_list':size_list},
                 'dataType': 'json'

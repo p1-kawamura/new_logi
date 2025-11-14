@@ -78,6 +78,7 @@ class Irai_list(models.Model):
     catalog_cus_banchi=models.CharField("カタログ_番地",max_length=255,null=True,blank=True)
     catalog_cus_build=models.CharField("カタログ_建物名",max_length=255,null=True,blank=True)
     catalog_cus_tel=models.CharField("カタログ_電話番号",max_length=255,null=True,blank=True)
+    catalog_cus_tel_search=models.CharField("カタログ_電話番号_検索用",max_length=255,null=True,blank=True)
     catalog_cus_mail=models.CharField("カタログ_メールアドレス",max_length=255,null=True,blank=True)
     bikou=models.TextField("連絡事項",null=True,blank=True)
     shipped_day=models.DateField("発送完了日",null=True,blank=True,default=None)
@@ -89,7 +90,7 @@ class Irai_list(models.Model):
         return str(self.irai_num)
     
     # irai_type（依頼内容）　0:在庫出荷　1:キープ　2:カタログ発送　3:入庫
-    # irai_status（状態）　0:発送待ち　1:キープ中　2:発送済　3:キャンセル　4:キープ解除
+    # irai_status（状態）　0:発送待ち　1:キープ中　2:発送済　3:キャンセル　4:キープ解除　5:入庫済　6:準備中
     # hassou_type（発送タイプ）　0:なし（キープ/入庫） 1:通常便　2:お急ぎ便　3:当日出荷
     
 
