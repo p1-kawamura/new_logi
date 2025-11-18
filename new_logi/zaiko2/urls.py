@@ -1,7 +1,8 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import henshu_index,henshu_hinban_enter,henshu_hinban_click,henshu_list_click,henshu_up,henshu_del, \
-                    size_index,size_num_func,size_new,size_name,size_del,size_same,nyuuko_index,excel_download,excel_import,nyuuko_send
+                    size_index,size_num_func,size_new,size_name,size_del,size_same,nyuuko_index,excel_download,excel_import,nyuuko_send, \
+                    vba_irai_list
 
 
 app_name="zaiko2"
@@ -22,4 +23,5 @@ urlpatterns = [
     path('excel_download', excel_download, name="excel_download"),
     path('excel_import', excel_import, name="excel_import"),
     path('nyuuko_send', nyuuko_send, name="nyuuko_send"),
+    path('vba_irai_list', vba_irai_list, name="vba_irai_list"),
 ]

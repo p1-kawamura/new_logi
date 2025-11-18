@@ -13,6 +13,7 @@ from io import BytesIO
 from django.http import HttpResponse
 from django_pandas.io import read_frame
 import openpyxl
+from django.views.decorators.csrf import csrf_exempt
 
 
 # 編集画面
@@ -257,3 +258,47 @@ def nyuuko_send(request):
 
     d={"ans":ans}
     return JsonResponse(d)
+
+
+# VBA_依頼情報取得POST
+@csrf_exempt
+def vba_irai_list(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            hassou_type = data.get("hassou_type")
+            
+            if hassou_type=="当日":
+                ins_lis=Irai_list.objects.filter(irai_status=0,hassou_type=3)
+            elif hassou_type=="全部":
+                ins_lis=Irai_list.objects.filter(irai_status=0)
+
+            # 準備中に変更
+            # for i in ins_lis:
+            #     i.irai_status=6
+            #     i.save()
+
+            # 在庫関連
+            irai_num_list=list(ins_lis.values_list("irai_num",flat=True))
+            ins_det=Irai_detail.objects.filter(irai_num__in=irai_num_list)
+            # for i in ins_det:
+            #     ins_sho=Shouhin.objects.get(hontai_num=i.hontai_num)
+            #     ins_sho.available -= i.kazu
+            #     ins_sho.stock -= i.kazu
+            #     ins_sho.save()
+
+            det_list=list(ins_det.values())
+            for i in det_list:
+                i["last_stock"]=Shouhin.objects.get(hontai_num=i["hontai_num"]).stock
+
+            res_dic={
+                "list":list(ins_lis.values()),
+                "detail":det_list,
+                }
+            return JsonResponse(res_dic,status=200)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse({"error": "POST only"}, status=405)
+    

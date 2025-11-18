@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="icon" href="{% static 'tamori.gif' %}">   
-    <title>物流在庫_履歴詳細</title>
+    <title>物流在庫（履歴詳細）</title>
 </head>
 <body>
     <div class="mt-3 mb-5">
@@ -41,8 +41,8 @@
                         </div>
                         <div class="flex2 mt-2" style="align-items: end;">
                             <div>
-                                <div style="margin-top: 10px;">所属：{{irai.shozoku}}</div>
-                                <div style="margin-top: 5px;">担当：{{irai.tantou}}</div>
+                                <div style="margin-top: 10px;">所属：<span id="shozoku">{{irai.shozoku}}</span></div>
+                                <div style="margin-top: 5px;">担当：<span id="tantou">{{irai.tantou}}</span></div>
                                 <div style="margin-top: 5px;">
                                     状態：
                                     {% if irai.irai_status == 0 %}
@@ -358,19 +358,28 @@
 
         // キャンセル
         function irai_cancel(){
-            var ans=confirm("本当にキャンセルしますか？");
-            if (ans){
-                $.ajax({
-                    'url': '{% url "zaiko:irai_cancel" %}',
-                    'type': 'POST',
-                    'data': {"irai_num":document.getElementById("irai_num").innerText},
-                    'dataType': 'json'
-                })
-                .done(function(response){
-                    window.location.reload();
-                    window.alert("依頼をキャンセルしました！");         
-                });
-            } 
+            var shozoku = document.getElementById("shozoku").innerText
+            var tantou = document.getElementById("tantou").innerText
+            var result = window.confirm(shozoku + " の " + tantou + "さんが依頼した案件です。\n\n本当にキャンセルしますか？");
+            if (result){
+                var irai_num=document.getElementById("irai_num").innerText;
+                var ans=window.prompt("所属部署と名前を入力してください（キャンセル依頼者）");
+                if (ans != "" && ans != null){
+                    $.ajax({
+                        'url': '{% url "zaiko:irai_cancel" %}',
+                        'type': 'POST',
+                        'data': {
+                            'irai_num': irai_num,
+                            'name':ans
+                        },
+                        'dataType': 'json'
+                    })
+                    .done(function(response){
+                        window.location.reload();
+                        window.alert("依頼をキャンセルしました！");
+                    });
+                };
+            };
         };
 
 

@@ -371,20 +371,32 @@ def irai_send_all(request):
 
     # 在庫出荷
     if irai_type=="zaiko":
-        Irai_list.objects.create(
-            irai_num=irai_num,
-            shozoku=dic["shozoku"],
-            tantou=dic["tantou"],
-            irai_type=0,
-            hassou_type=hassou_type,
-            hassou_day=dic["btn_t1_day"],
-            zaiko_type=dic["btn_t2"],
-            zaiko_kakouba=dic["kakouba"],
-            zaiko_gara=dic["gara"],
-            zaiko_cus=dic["cus"],
-            zaiko_system=dic["system"],
-            bikou=dic["bikou"],
-        )
+        if dic["btn_t2"]=="kakou":
+            Irai_list.objects.create(
+                irai_num=irai_num,
+                shozoku=dic["shozoku"],
+                tantou=dic["tantou"],
+                irai_type=0,
+                hassou_type=hassou_type,
+                hassou_day=dic["btn_t1_day"],
+                zaiko_type=dic["btn_t2"],
+                zaiko_kakouba=dic["kakouba"],
+                zaiko_gara=dic["gara"],
+                bikou=dic["bikou"],
+            )
+        elif dic["btn_t2"]=="muji":
+            Irai_list.objects.create(
+                irai_num=irai_num,
+                shozoku=dic["shozoku"],
+                tantou=dic["tantou"],
+                irai_type=0,
+                hassou_type=hassou_type,
+                hassou_day=dic["btn_t1_day"],
+                zaiko_type=dic["btn_t2"],
+                zaiko_cus=dic["cus"],
+                zaiko_system=dic["system"],
+                bikou=dic["bikou"],
+            )
     # キープ
     elif irai_type=="keep":
         Irai_list.objects.create(
@@ -397,27 +409,39 @@ def irai_send_all(request):
         )
     # カタログ発送
     elif irai_type=="catalog":
-        Irai_list.objects.create(
-            irai_num=irai_num,
-            shozoku=dic["shozoku"],
-            tantou=dic["tantou"],
-            irai_type=2,
-            hassou_type=hassou_type,
-            hassou_day=dic["btn_t1_day"],
-            catalog_type=dic["btn_t2"],
-            catalog_tempo=dic["tempo"],
-            catalog_cus_com=dic["cus_dic"]["cat_com"],
-            catalog_cus_name=dic["cus_dic"]["cat_name"],
-            catalog_cus_yubin=dic["cus_dic"]["cat_yubin"],
-            catalog_cus_pref=dic["cus_dic"]["cat_pref"],
-            catalog_cus_city=dic["cus_dic"]["cat_city"],
-            catalog_cus_banchi=dic["cus_dic"]["cat_banchi"],
-            catalog_cus_build=dic["cus_dic"]["cat_build"],
-            catalog_cus_tel=dic["cus_dic"]["cat_tel"],
-            catalog_cus_tel_search=dic["cus_dic"]["cat_tel"].replace("-","").strip(),
-            catalog_cus_mail=dic["cus_dic"]["cat_mail"],
-            bikou=dic["bikou"],
-        )
+        if dic["btn_t2"]=="tempo":
+            Irai_list.objects.create(
+                irai_num=irai_num,
+                shozoku=dic["shozoku"],
+                tantou=dic["tantou"],
+                irai_type=2,
+                hassou_type=hassou_type,
+                hassou_day=dic["btn_t1_day"],
+                catalog_type=dic["btn_t2"],
+                catalog_tempo=dic["tempo"],
+                bikou=dic["bikou"],
+            )
+        elif dic["btn_t2"]=="cus":
+            Irai_list.objects.create(
+                irai_num=irai_num,
+                shozoku=dic["shozoku"],
+                tantou=dic["tantou"],
+                irai_type=2,
+                hassou_type=hassou_type,
+                hassou_day=dic["btn_t1_day"],
+                catalog_type=dic["btn_t2"],
+                catalog_cus_com=dic["cus_dic"]["cat_com"],
+                catalog_cus_name=dic["cus_dic"]["cat_name"],
+                catalog_cus_yubin=dic["cus_dic"]["cat_yubin"],
+                catalog_cus_pref=dic["cus_dic"]["cat_pref"],
+                catalog_cus_city=dic["cus_dic"]["cat_city"],
+                catalog_cus_banchi=dic["cus_dic"]["cat_banchi"],
+                catalog_cus_build=dic["cus_dic"]["cat_build"],
+                catalog_cus_tel=dic["cus_dic"]["cat_tel"],
+                catalog_cus_tel_search=dic["cus_dic"]["cat_tel"].replace("-","").strip(),
+                catalog_cus_mail=dic["cus_dic"]["cat_mail"],
+                bikou=dic["bikou"],
+            )
 
     ####### 商品 #######
     items=request.session["zaiko"]["items"]
@@ -458,9 +482,8 @@ def irai_send_all(request):
 
 # 依頼履歴_一覧
 def rireki_index(request):
-    shozoku_list=Shozoku.objects.all()
+    shozoku_list=list(Shozoku.objects.all().values_list("shozoku",flat=True))
     ses=request.session["zaiko"]["rireki_search"]
-    print(ses)
 
     # フィルター
     if len(ses)==0:
@@ -469,15 +492,56 @@ def rireki_index(request):
         fil={}
         if ses["sr_irai_num"] != "":
             fil["irai_num"]=ses["sr_irai_num"]
-        
-        # if ses["cus_tel"] != "":
-        #     tel=ses["cus_tel"].strip().replace("-","")
-        #     ins_tel=list(Customer.objects.filter(tel_search=tel).values_list("cus_id",flat=True))
-        #     ins_mob=list(Customer.objects.filter(tel_mob_search=tel).values_list("cus_id",flat=True))
-        #     list_tel_mob=set(ins_tel + ins_mob)
-        #     fil["cus_id__in"]=list_tel_mob
+        if ses["sr_irai_day_st"] != "":
+            fil["irai_day__gte"]=ses["sr_irai_day_st"] + " 00:00:00"
+        if ses["sr_irai_day_ed"] != "":
+            fil["irai_day__lte"]=ses["sr_irai_day_ed"] + " 23:59:59"
+        if ses["sr_hassou_day_st"] != "":
+            fil["hassou_day__gte"]=ses["sr_hassou_day_st"]
+        if ses["sr_hassou_day_ed"] != "":
+            fil["hassou_day__lte"]=ses["sr_hassou_day_ed"]
+        if ses["sr_hassou_type"] != "":
+            fil["hassou_type"]=ses["sr_hassou_type"]
+        if ses["sr_shozoku"] != "":
+            fil["shozoku"]=ses["sr_shozoku"]
+        if ses["sr_tantou"] != "":
+            fil["tantou__contains"]=ses["sr_tantou"].strip()
+        if ses["sr_naiyou_1"] != "":
+            fil["irai_type"]=ses["sr_naiyou_1"]
+
+        if ses["sr_naiyou_2"] != "":
+            ins_zaiko=list(Irai_list.objects.filter(zaiko_type=ses["sr_naiyou_2"]).values_list("irai_num",flat=True))
+            ins_catalog=list(Irai_list.objects.filter(catalog_type=ses["sr_naiyou_2"]).values_list("irai_num",flat=True))
+            ins_all=set(ins_zaiko + ins_catalog)
+            fil["irai_num__in"]=ins_all
+
+        if ses["sr_status"] != "":
+            fil["irai_status"]=ses["sr_status"]
+
+        if ses["sr_cus"] != "":
+            ins_zaiko_cus=list(Irai_list.objects.filter(zaiko_cus__contains=ses["sr_cus"]).values_list("irai_num",flat=True))
+            ins_zaiko_kakouba=list(Irai_list.objects.filter(zaiko_kakouba__contains=ses["sr_cus"]).values_list("irai_num",flat=True))
+            ins_zaiko_gara=list(Irai_list.objects.filter(zaiko_gara__contains=ses["sr_cus"]).values_list("irai_num",flat=True))
+            ins_keep_cus=list(Irai_list.objects.filter(keep_cus__contains=ses["sr_cus"]).values_list("irai_num",flat=True))
+            ins_catalog_cus_com=list(Irai_list.objects.filter(catalog_cus_com__contains=ses["sr_cus"]).values_list("irai_num",flat=True))
+            ins_catalog_cus_name=list(Irai_list.objects.filter(catalog_cus_name__contains=ses["sr_cus"]).values_list("irai_num",flat=True))
+            ins_catalog_tempo=list(Irai_list.objects.filter(catalog_tempo__contains=ses["sr_cus"]).values_list("irai_num",flat=True))
+            ins_all=set(ins_zaiko_cus + ins_zaiko_kakouba + ins_zaiko_gara + ins_keep_cus + ins_catalog_cus_com + ins_catalog_cus_name + ins_catalog_tempo)
+            fil["irai_num__in"]=ins_all
+
+        if ses["sr_tel"] != "":
+            fil["catalog_cus_tel"]=ses["sr_tel"].strip().replace("-","") 
+        if ses["sr_mail"] != "":          
+            fil["catalog_cus_mail"]=ses["sr_mail"]
 
         irai_list=Irai_list.objects.filter(**fil).order_by("irai_num").reverse()
+
+    sr_hassou_type={"1":"通常便","2":"お急ぎ便","3":"当日出荷"}
+    sr_naiyou_1={"0":"在庫出荷","1":"キープ","2":"カタログ発送","3":"入庫"}
+    sr_naiyou_2_zaiko={"kakou":"加工あり","muji":"無地"}
+    sr_naiyou_2_catalog={"tempo":"店舗あて","cus":"顧客あて"}
+    sr_status={"0":"発送待ち","2":"発送済み","1":"キープ中","4":"キープ解除","3":"キャンセル","6":"準備中"}
+    
 
     #全ページ数
     if irai_list.count()==0:
@@ -494,8 +558,14 @@ def rireki_index(request):
     params={
         "irai_list":irai_list,
         "shozoku_list":shozoku_list,
+        "sr_hassou_type":sr_hassou_type,
+        "sr_naiyou_1":sr_naiyou_1,
+        "sr_naiyou_2_zaiko":sr_naiyou_2_zaiko,
+        "sr_naiyou_2_catalog":sr_naiyou_2_catalog,
+        "sr_status":sr_status,
         "num":num,
         "all_num":all_num,
+        "ses":ses,
     }
     return render(request,"zaiko/rireki_list.html",params)
 
@@ -504,6 +574,7 @@ def rireki_index(request):
 def rireki_search(request):
     form_data = {key: value for key, value in request.POST.items()}
     request.session["zaiko"]["rireki_search"]=form_data
+    request.session["zaiko"]["page_num"]=1
     return redirect("zaiko:rireki_index")
 
 
@@ -557,9 +628,10 @@ def irai_change_today(request):
 # 依頼キャンセル
 def irai_cancel(request):
     irai_num=request.POST.get("irai_num")
+    name=request.POST.get("name")
     ins=Irai_list.objects.get(irai_num=irai_num)
     ins.irai_status=3
-    ins.cancel_day=datetime.now().strftime("%Y年%m月%d日 %H:%M")
+    ins.cancel_day=name + "：" + datetime.now().strftime("%Y年%m月%d日 %H:%M")
     ins.save()
 
     # 在庫を戻す
