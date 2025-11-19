@@ -54,7 +54,7 @@ class Size(models.Model):
     
 
 class Irai_list(models.Model):
-    irai_num=models.IntegerField("依頼No",primary_key=True)
+    irai_num=models.IntegerField("依頼No",default=0)
     irai_day=models.DateTimeField("依頼日",auto_now_add=True)
     shozoku=models.CharField("所属",max_length=255,null=True,blank=True)
     tantou=models.CharField("担当者",max_length=255,null=True,blank=True)
@@ -85,6 +85,7 @@ class Irai_list(models.Model):
     shipped_com=models.CharField("運送会社",max_length=255,null=True,blank=True)
     shipped_num=models.CharField("お問い合わせ番号",max_length=255,null=True,blank=True)
     cancel_day=models.CharField("キャンセル日時",max_length=255,null=True,blank=True)
+    place=models.CharField("拠点",max_length=255)
     
     def __str__(self):
         return str(self.irai_num)

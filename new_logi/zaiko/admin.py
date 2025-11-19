@@ -23,7 +23,7 @@ class A_size(ModelAdmin):
 
 class A_irai_list(ModelAdmin):
     model=Irai_list
-    list_display=["irai_num","irai_day","shozoku","tantou","irai_type","irai_status","hassou_type","hassou_day"]
+    list_display=["irai_num","irai_day","shozoku","tantou","irai_type","irai_status","hassou_type","hassou_day","place"]
 
 class A_irai_detail(ModelAdmin):
     model=Irai_detail
