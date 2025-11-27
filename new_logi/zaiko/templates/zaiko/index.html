@@ -694,8 +694,12 @@
                 if (response.ses_list.includes(i.hontai_num.toString())){
                     input="<span style='font-size:0.9em; color:red;'>追加済み</span>";
                 } else {
-                    input="<input type='number' min='0' max='" + i.available + 
+                    if (i.available > 0){
+                        input="<input type='number' min='0' max='" + i.available + 
                         "' class='form-control' id='hontai_" + i.hontai_num + "' name='orders' style='text-align:right;'>";
+                    } else {
+                        input="";
+                    }                    
                 }
                 var attention="";
                 if (i.attention){attention = i.attention};
@@ -1096,8 +1100,13 @@
                         'dataType': 'json'
                     })
                     .done(function(response){
-                        window.location.href="./rireki_detail/" + response.irai_num;
-                        window.alert("依頼が完了しました！");
+                        var pk_list=response.pk_list;
+                        window.location.href="./rireki_detail/" + pk_list[0];                     
+                        if (pk_list.length == 1){
+                            window.alert("依頼が完了しました！");
+                        } else {
+                            window.alert("発送拠点が複数のため、依頼内容を分割しました！\n\n詳細は履歴一覧で確認してください。");
+                        }
                     });
                 }  
             });  
@@ -1145,8 +1154,13 @@
                         'dataType': 'json'
                     })
                     .done(function(response){
-                        window.location.href="./rireki_detail/" + response.irai_num;
-                        window.alert("依頼が完了しました！");                        
+                        var pk_list=response.pk_list;
+                        window.location.href="./rireki_detail/" + pk_list[0];                     
+                        if (pk_list.length == 1){
+                            window.alert("依頼が完了しました！");
+                        } else {
+                            window.alert("発送拠点が複数のため、依頼内容を分割しました！\n\n詳細は履歴一覧で確認してください。");
+                        }
                     });
                 }  
             });  
@@ -1243,8 +1257,13 @@
                         'dataType': 'json'
                     })
                     .done(function(response){
-                        window.location.href="./rireki_detail/" + response.irai_num;
-                        window.alert("依頼が完了しました！");                        
+                        var pk_list=response.pk_list;
+                        window.location.href="./rireki_detail/" + pk_list[0];                     
+                        if (pk_list.length == 1){
+                            window.alert("依頼が完了しました！");
+                        } else {
+                            window.alert("発送拠点が複数のため、依頼内容を分割しました！\n\n詳細は履歴一覧で確認してください。");
+                        }                    
                     });
                 }  
             });            

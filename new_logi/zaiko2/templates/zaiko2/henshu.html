@@ -30,10 +30,18 @@
         
 
             <!-- 商品検索 -->
-            <div class="flex2">
-                <div><i class="bi bi-search"></i> 商品検索：</div>
-                <div style="width: 500px;"><input class="form-control" type="text" id="hinban_enter"></div>
+            <div class="flex3">
+                <div class="flex2">
+                    <div><i class="bi bi-search"></i> 商品検索：</div>
+                    <div style="width: 500px;"><input class="form-control" type="text" id="hinban_enter"></div>
+                </div>
+                <div>
+                    <a href="{% url 'zaiko2:henshu_excel_download' %}">
+                        <button type="button" class="btn btn-outline-dark"><i class="bi bi-download"></i> 商品一覧ダウンロード</button>
+                    </a>
+                </div>
             </div>
+            
             <div class="mt-3">
                 <select class="form-control" id="hinban_list" style="width: 600px; height:120px;" size="5"></select>
             </div>

@@ -36,8 +36,13 @@
             <div class="mt-4" style="width: 900px;">
                 <div class="flex3" style="align-items: end;">
                     <div>
-                        <div class="irai_title" style="align-items: end;">
-                            <span style="font-size: 1.5em; font-weight: bold;">依頼No.<span id="irai_num">{{irai.irai_num}}</span></span>　（依頼日時：{{irai.irai_day}}）
+                        <div class="irai_title">
+                            <div>
+                                <span style="font-size: 1.5em; font-weight: bold;">依頼No.<span id="irai_num">{{irai.irai_num}}</span></span>　（依頼日時：{{irai.irai_day}}）
+                            </div>                            
+                            {% if pk_count > 1 %}
+                                <div style="font-size: 0.9em; margin-top: 10px;"><u>※この依頼は複数拠点から発送されます。</u></div>
+                            {% endif %} 
                         </div>
                         <div class="flex2 mt-2" style="align-items: end;">
                             <div>
@@ -71,37 +76,39 @@
 
                     <!-- 在庫出荷とカタログ発送のみ -->
                     {% if irai.irai_type == 0 or irai.irai_type == 2 %}
-                        <div class="flex2" style="margin-left: 50px; align-items: end;">
-                            <!-- 発送待ちのみ -->
-                            {% if irai.irai_status == 0 %}
+                    <div class="flex2" style="margin-left: 50px; align-items: end;">
+                        <!-- 発送待ちのみ -->
+                        {% if irai.irai_status == 0 %}
 
-                                {% if irai.hassou_type != 3 %}
-                                <div>
-                                    <button type="submit" class="btn btn-danger" onclick="change_today()">当日出荷に変更</button>
-                                </div>
-                                {% endif %}
-                            
-                                {% if irai.hassou_type == 1 %}
-                                <div class="point point_1" style="margin-top: 50px; margin-left: 30px; width: 240px;">
-                                    <span class="box-title box-title_1">通常便
-                                {% elif irai.hassou_type == 2 %}
-                                <div class="point point_2" style="margin-top: 50px; margin-left: 30px; width: 240px;">
-                                    <span class="box-title box-title_2">お急ぎ便
-                                {% elif irai.hassou_type == 3 %}
-                                <div class="point point_3" style="margin-top: 50px; margin-left: 30px; width: 240px;">
-                                    <span class="box-title box-title_3">当日出荷
-                                {% endif %}
-                                    </span>
-                                    <span style="font-size: 1.2em;">{{irai.hassou_day}}（{{irai.hassou_day | weekday_jp}}）</span>
-                                </div>
-
+                            {% if irai.hassou_type != 3 %}
+                            <div>
+                                <button type="submit" class="btn btn-danger" onclick="change_today()">当日出荷に変更</button>
+                            </div>
                             {% endif %}
-                        </div>
+                        
+                            {% if irai.hassou_type == 1 %}
+                            <div class="point point_1" style="margin-top: 50px; margin-left: 30px; width: 240px;">
+                                <span class="box-title box-title_1">通常便
+                            {% elif irai.hassou_type == 2 %}
+                            <div class="point point_2" style="margin-top: 50px; margin-left: 30px; width: 240px;">
+                                <span class="box-title box-title_2">お急ぎ便
+                            {% elif irai.hassou_type == 3 %}
+                            <div class="point point_3" style="margin-top: 50px; margin-left: 30px; width: 240px;">
+                                <span class="box-title box-title_3">当日出荷
+                            {% endif %}
+                                </span>
+                                <span style="font-size: 1.2em;">{{irai.hassou_day}}（{{irai.hassou_day | weekday_jp}}）</span>
+                            </div>
+                        {% endif %}
+                    </div>
                     {% endif %}     
+                    
+                    
 
                 </div>
                 
                 <!-- 商品 -->
+                <div style="display: none;" id="place">{{irai.place}}</div>
                 <div style="margin-top: 30px;">
                     <table class="table table-bordered" style="font-size: 0.9em; width: 900px;">
                         <thead>
@@ -285,7 +292,7 @@
                         <tr class="table-secondary"><td colspan="2">■ 発送情報</td></tr>
                         <tr>
                             <td style="width: 200px;">発送完了日</td>
-                            <td>{% if irai.shipped_day %}{{irai.shipped_day}}{% endif %}</td>
+                            <td>{% if irai.shipped_day %}{{irai.shipped_day}}（{{irai.shipped_day | weekday_jp}}）{% endif %}</td>
                         </tr>
                         <tr>
                             <td>運送会社</td>
@@ -345,7 +352,10 @@
                 $.ajax({
                     'url': '{% url "zaiko:irai_change_today" %}',
                     'type': 'POST',
-                    'data': {"irai_num":document.getElementById("irai_num").innerText},
+                    'data': {
+                        "irai_num":document.getElementById("irai_num").innerText,
+                        "place":document.getElementById("place").innerText
+                    },
                     'dataType': 'json'
                 })
                 .done(function(response){
@@ -363,6 +373,7 @@
             var result = window.confirm(shozoku + " の " + tantou + "さんが依頼した案件です。\n\n本当にキャンセルしますか？");
             if (result){
                 var irai_num=document.getElementById("irai_num").innerText;
+                var place=document.getElementById("place").innerText;
                 var ans=window.prompt("所属部署と名前を入力してください（キャンセル依頼者）");
                 if (ans != "" && ans != null){
                     $.ajax({
@@ -370,6 +381,7 @@
                         'type': 'POST',
                         'data': {
                             'irai_num': irai_num,
+                            'place':place,
                             'name':ans
                         },
                         'dataType': 'json'
@@ -390,7 +402,10 @@
                 $.ajax({
                     'url': '{% url "zaiko:irai_keep_hassou" %}',
                     'type': 'POST',
-                    'data': {"irai_num":document.getElementById("irai_num").innerText},
+                    'data': {
+                        "irai_num":document.getElementById("irai_num").innerText,
+                        "place":document.getElementById("place").innerText
+                    },
                     'dataType': 'json'
                 })
                 .done(function(response){

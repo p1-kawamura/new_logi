@@ -362,127 +362,144 @@ def irai_send_all(request):
     except:
         irai_num=1
 
-    ####### Irai_list #######
-    if irai_type in ["zaiko","catalog"]:
-        if dic["btn_t1"]=="regular":
-            hassou_type=1
-        else:
-            hassou_type=2
-
-    # 在庫出荷
-    if irai_type=="zaiko":
-        if dic["btn_t2"]=="kakou":
-            Irai_list.objects.create(
-                irai_num=irai_num,
-                shozoku=dic["shozoku"],
-                tantou=dic["tantou"],
-                irai_type=0,
-                hassou_type=hassou_type,
-                hassou_day=dic["btn_t1_day"],
-                zaiko_type=dic["btn_t2"],
-                zaiko_kakouba=dic["kakouba"],
-                zaiko_gara=dic["gara"],
-                bikou=dic["bikou"],
-            )
-        elif dic["btn_t2"]=="muji":
-            Irai_list.objects.create(
-                irai_num=irai_num,
-                shozoku=dic["shozoku"],
-                tantou=dic["tantou"],
-                irai_type=0,
-                hassou_type=hassou_type,
-                hassou_day=dic["btn_t1_day"],
-                zaiko_type=dic["btn_t2"],
-                zaiko_cus=dic["cus"],
-                zaiko_system=dic["system"],
-                bikou=dic["bikou"],
-            )
-    # キープ
-    elif irai_type=="keep":
-        Irai_list.objects.create(
-            irai_num=irai_num,
-            shozoku=dic["shozoku"],
-            tantou=dic["tantou"],
-            irai_type=1,
-            irai_status=1,
-            keep_cus=dic["keep_cus"],
-        )
-    # カタログ発送
-    elif irai_type=="catalog":
-        if dic["btn_t2"]=="tempo":
-            Irai_list.objects.create(
-                irai_num=irai_num,
-                shozoku=dic["shozoku"],
-                tantou=dic["tantou"],
-                irai_type=2,
-                hassou_type=hassou_type,
-                hassou_day=dic["btn_t1_day"],
-                catalog_type=dic["btn_t2"],
-                catalog_tempo=dic["tempo"],
-                bikou=dic["bikou"],
-            )
-        elif dic["btn_t2"]=="cus":
-            Irai_list.objects.create(
-                irai_num=irai_num,
-                shozoku=dic["shozoku"],
-                tantou=dic["tantou"],
-                irai_type=2,
-                hassou_type=hassou_type,
-                hassou_day=dic["btn_t1_day"],
-                catalog_type=dic["btn_t2"],
-                catalog_cus_com=dic["cus_dic"]["cat_com"],
-                catalog_cus_name=dic["cus_dic"]["cat_name"],
-                catalog_cus_yubin=dic["cus_dic"]["cat_yubin"],
-                catalog_cus_pref=dic["cus_dic"]["cat_pref"],
-                catalog_cus_city=dic["cus_dic"]["cat_city"],
-                catalog_cus_banchi=dic["cus_dic"]["cat_banchi"],
-                catalog_cus_build=dic["cus_dic"]["cat_build"],
-                catalog_cus_tel=dic["cus_dic"]["cat_tel"],
-                catalog_cus_tel_search=dic["cus_dic"]["cat_tel"].replace("-","").strip(),
-                catalog_cus_mail=dic["cus_dic"]["cat_mail"],
-                bikou=dic["bikou"],
-            )
-
-    ####### 商品 #######
+    # 拠点で分割
     items=request.session["zaiko"]["items"]
+    place_list=[]
     for i in items:
         hontai_num,kazu=map(int,i.split("_"))
         ins=Shouhin.objects.get(hontai_num=hontai_num)
+        place_list.append(ins.place)
+    place_list=set(place_list)
 
-        # Irai_detail
-        Irai_detail.objects.create(
-            irai_num=irai_num,
-            hontai_num=ins.hontai_num,
-            place=ins.place,
-            shouhin_num=ins.shouhin_num,
-            shouhin_name=ins.shouhin_name,
-            color=ins.color,
-            size=ins.size,
-            size_num=ins.size_num,
-            tana=ins.tana,
-            cost_price=ins.cost_price,
-            bikou=ins.bikou,
-            attention=ins.attention,
-            jan_code=ins.jan_code,
-            kazu=kazu,
-        )
-        # Shouhin
+    for i in place_list:
+        ####### Irai_list #######
         if irai_type in ["zaiko","catalog"]:
-            ins.available -= kazu
+            if dic["btn_t1"]=="regular":
+                hassou_type=1
+            else:
+                hassou_type=2
+
+        # 在庫出荷
+        if irai_type=="zaiko":
+            if dic["btn_t2"]=="kakou":
+                Irai_list.objects.create(
+                    irai_num=irai_num,
+                    shozoku=dic["shozoku"],
+                    tantou=dic["tantou"],
+                    irai_type=0,
+                    hassou_type=hassou_type,
+                    hassou_day=dic["btn_t1_day"],
+                    zaiko_type=dic["btn_t2"],
+                    zaiko_kakouba=dic["kakouba"],
+                    zaiko_gara=dic["gara"],
+                    bikou=dic["bikou"],
+                    place=i,
+                )
+            elif dic["btn_t2"]=="muji":
+                Irai_list.objects.create(
+                    irai_num=irai_num,
+                    shozoku=dic["shozoku"],
+                    tantou=dic["tantou"],
+                    irai_type=0,
+                    hassou_type=hassou_type,
+                    hassou_day=dic["btn_t1_day"],
+                    zaiko_type=dic["btn_t2"],
+                    zaiko_cus=dic["cus"],
+                    zaiko_system=dic["system"],
+                    bikou=dic["bikou"],
+                    place=i,
+                )
+        # キープ
         elif irai_type=="keep":
-            ins.keep += kazu
-            ins.available -= kazu
-        ins.save()
+            Irai_list.objects.create(
+                irai_num=irai_num,
+                shozoku=dic["shozoku"],
+                tantou=dic["tantou"],
+                irai_type=1,
+                irai_status=1,
+                keep_cus=dic["keep_cus"],
+                place=i,
+            )
+        # カタログ発送
+        elif irai_type=="catalog":
+            if dic["btn_t2"]=="tempo":
+                Irai_list.objects.create(
+                    irai_num=irai_num,
+                    shozoku=dic["shozoku"],
+                    tantou=dic["tantou"],
+                    irai_type=2,
+                    hassou_type=hassou_type,
+                    hassou_day=dic["btn_t1_day"],
+                    catalog_type=dic["btn_t2"],
+                    catalog_tempo=dic["tempo"],
+                    bikou=dic["bikou"],
+                    place=i,
+                )
+            elif dic["btn_t2"]=="cus":
+                Irai_list.objects.create(
+                    irai_num=irai_num,
+                    shozoku=dic["shozoku"],
+                    tantou=dic["tantou"],
+                    irai_type=2,
+                    hassou_type=hassou_type,
+                    hassou_day=dic["btn_t1_day"],
+                    catalog_type=dic["btn_t2"],
+                    catalog_cus_com=dic["cus_dic"]["cat_com"],
+                    catalog_cus_name=dic["cus_dic"]["cat_name"],
+                    catalog_cus_yubin=dic["cus_dic"]["cat_yubin"],
+                    catalog_cus_pref=dic["cus_dic"]["cat_pref"],
+                    catalog_cus_city=dic["cus_dic"]["cat_city"],
+                    catalog_cus_banchi=dic["cus_dic"]["cat_banchi"],
+                    catalog_cus_build=dic["cus_dic"]["cat_build"],
+                    catalog_cus_tel=dic["cus_dic"]["cat_tel"],
+                    catalog_cus_tel_search=dic["cus_dic"]["cat_tel"].replace("-","").strip(),
+                    catalog_cus_mail=dic["cus_dic"]["cat_mail"],
+                    bikou=dic["bikou"],
+                    place=i,
+                )
+
+        ####### 商品 #######
+        for h in items:
+            hontai_num,kazu=map(int,h.split("_"))
+            ins=Shouhin.objects.get(hontai_num=hontai_num)
+
+            if ins.place==i:
+                # Irai_detail
+                Irai_detail.objects.create(
+                    irai_num=irai_num,
+                    hontai_num=ins.hontai_num,
+                    place=ins.place,
+                    shouhin_num=ins.shouhin_num,
+                    shouhin_name=ins.shouhin_name,
+                    color=ins.color,
+                    size=ins.size,
+                    size_num=ins.size_num,
+                    tana=ins.tana,
+                    cost_price=ins.cost_price,
+                    bikou=ins.bikou,
+                    attention=ins.attention,
+                    jan_code=ins.jan_code,
+                    kazu=kazu,
+                )
+                # Shouhin
+                if irai_type in ["zaiko","catalog"]:
+                    ins.available -= kazu
+                elif irai_type=="keep":
+                    ins.keep += kazu
+                    ins.available -= kazu
+                ins.save()
 
     request.session["zaiko"]["items"]=[]
+    pk_list=list(Irai_list.objects.filter(irai_num=irai_num).values_list("id",flat=True))
 
-    d={"irai_num":irai_num}
+    d={"pk_list":pk_list}
     return JsonResponse(d)
 
 
 # 依頼履歴_一覧
 def rireki_index(request):
     shozoku_list=list(Shozoku.objects.all().values_list("shozoku",flat=True))
+    place_list=list(Place.objects.filter(show=1).values_list("place",flat=True))
     ses=request.session["zaiko"]["rireki_search"]
 
     # フィルター
@@ -515,6 +532,8 @@ def rireki_index(request):
             ins_all=set(ins_zaiko + ins_catalog)
             fil["irai_num__in"]=ins_all
 
+        if ses["sr_place"] != "":
+            fil["place"]=ses["sr_place"]
         if ses["sr_status"] != "":
             fil["irai_status"]=ses["sr_status"]
 
@@ -558,6 +577,7 @@ def rireki_index(request):
     params={
         "irai_list":irai_list,
         "shozoku_list":shozoku_list,
+        "place_list":place_list,
         "sr_hassou_type":sr_hassou_type,
         "sr_naiyou_1":sr_naiyou_1,
         "sr_naiyou_2_zaiko":sr_naiyou_2_zaiko,
@@ -606,10 +626,15 @@ def page_last(request):
 
 
 # 依頼履歴_詳細
-def rireki_detail(request,irai_num):
+def rireki_detail(request,pk):
+    ins=Irai_list.objects.get(pk=pk)
+    irai_num=ins.irai_num
+    place=ins.place
+    pk_count=Irai_list.objects.filter(irai_num=irai_num).count()
     params={
-        "irai":Irai_list.objects.filter(irai_num=irai_num).values()[0],
-        "shouhin_list":Irai_detail.objects.filter(irai_num=irai_num).values(),
+        "irai":Irai_list.objects.filter(pk=pk).values()[0],
+        "shouhin_list":Irai_detail.objects.filter(irai_num=irai_num,place=place).values(),
+        "pk_count":pk_count,
     }
     return render(request,"zaiko/rireki_index.html",params)
 
@@ -617,7 +642,8 @@ def rireki_detail(request,irai_num):
 # 当日出荷に変更
 def irai_change_today(request):
     irai_num=request.POST.get("irai_num")
-    ins=Irai_list.objects.get(irai_num=irai_num)
+    place=request.POST.get("place")
+    ins=Irai_list.objects.get(irai_num=irai_num,place=place)
     ins.hassou_type=3
     ins.hassou_day=datetime.today()
     ins.save()
@@ -628,8 +654,9 @@ def irai_change_today(request):
 # 依頼キャンセル
 def irai_cancel(request):
     irai_num=request.POST.get("irai_num")
+    place=request.POST.get("place")
     name=request.POST.get("name")
-    ins=Irai_list.objects.get(irai_num=irai_num)
+    ins=Irai_list.objects.get(irai_num=irai_num,place=place)
     ins.irai_status=3
     ins.cancel_day=name + "：" + datetime.now().strftime("%Y年%m月%d日 %H:%M")
     ins.save()
@@ -652,13 +679,14 @@ def irai_cancel(request):
 # キープから発送
 def irai_keep_hassou(request):
     irai_num=request.POST.get("irai_num")
-    ins=Irai_list.objects.get(irai_num=irai_num)
+    place=request.POST.get("place")
+    ins=Irai_list.objects.get(irai_num=irai_num,place=place)
     ins.irai_status=3
-    ins.cancel_day=datetime.now().strftime("%Y年%m月%d日 %H:%M")
+    ins.cancel_day="発送切替：" + datetime.now().strftime("%Y年%m月%d日 %H:%M")
     ins.save()
 
     # キャンセル扱いにして、在庫を戻す
-    shouhin_list=Irai_detail.objects.filter(irai_num=irai_num)
+    shouhin_list=Irai_detail.objects.filter(irai_num=irai_num,place=place)
     ses_item=[]
     for i in shouhin_list:
         ins2=Shouhin.objects.get(hontai_num=i.hontai_num)
@@ -732,5 +760,5 @@ def csv_imp(request):
 
 # 自由コード
 def free(request):
-    Shouhin.objects.all().delete()
+    request.session.clear()  
     return redirect("zaiko:index")

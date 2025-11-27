@@ -75,6 +75,27 @@ def henshu_del(request):
     return JsonResponse(d)
 
 
+# 商品テーブル_download
+def henshu_excel_download(request):
+    ins=Shouhin.objects.all()
+    df=read_frame(ins)
+
+    # Excelファイルをメモリ上に作成
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='商品一覧')
+
+    buffer.seek(0)
+
+    # HTTPレスポンスとしてExcelファイルを返す
+    response = HttpResponse(
+        buffer,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="products.xlsx"'
+    return response
+
+
 # サイズ画面
 def size_index(request):
     sizes=Size.objects.all().order_by("size_num")
@@ -267,34 +288,60 @@ def vba_irai_list(request):
         try:
             data = json.loads(request.body.decode("utf-8"))
             hassou_type = data.get("hassou_type")
+            place = data.get("place")
             
             if hassou_type=="当日":
-                ins_lis=Irai_list.objects.filter(irai_status=0,hassou_type=3)
+                ins_lis=Irai_list.objects.filter(irai_status=0,hassou_type=3,place=place)
             elif hassou_type=="全部":
-                ins_lis=Irai_list.objects.filter(irai_status=0)
-
-            # 準備中に変更
-            # for i in ins_lis:
-            #     i.irai_status=6
-            #     i.save()
+                ins_lis=Irai_list.objects.filter(irai_status=0,place=place)
 
             # 在庫関連
             irai_num_list=list(ins_lis.values_list("irai_num",flat=True))
-            ins_det=Irai_detail.objects.filter(irai_num__in=irai_num_list)
-            # for i in ins_det:
-            #     ins_sho=Shouhin.objects.get(hontai_num=i.hontai_num)
-            #     ins_sho.available -= i.kazu
-            #     ins_sho.stock -= i.kazu
-            #     ins_sho.save()
-
-            det_list=list(ins_det.values())
-            for i in det_list:
-                i["last_stock"]=Shouhin.objects.get(hontai_num=i["hontai_num"]).stock
-
+            ins_det=Irai_detail.objects.filter(irai_num__in=irai_num_list,place=place)
             res_dic={
                 "list":list(ins_lis.values()),
-                "detail":det_list,
+                "detail":list(ins_det.values()),
                 }
+            
+            # 準備中に変更
+            for i in ins_lis:
+                i.irai_status=6
+                i.save()
+
+            return JsonResponse(res_dic,status=200)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse({"error": "POST only"}, status=405)
+
+
+# VBA_発送完了POST
+@csrf_exempt
+def vba_hassou_data(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            hassou_data = data.get("hassou_data")
+            place = data.get("place")
+
+            # 発送完了に変更
+            for i in hassou_data:
+                ins=Irai_list.objects.get(irai_num=i["irai_num"],place=place)
+                ins.irai_status=2
+                ins.shipped_day=datetime.datetime.strptime(i["shipped_day"], "%Y/%m/%d").strftime("%Y-%m-%d")
+                ins.shipped_com=i["shipped_com"]
+                ins.shipped_num=i["shipped_num"]
+                ins.save()
+
+                # 在庫を減らす
+                ins_det=Irai_detail.objects.filter(irai_num=i["irai_num"])
+                for h in ins_det:
+                    ins_sho=Shouhin.objects.get(hontai_num=h.hontai_num)
+                    ins_sho.stock-=h.kazu
+                    ins_sho.save()
+
+            res_dic={}
             return JsonResponse(res_dic,status=200)
 
         except Exception as e:
