@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="icon" href="{% static 'tora.gif' %}">
     <title>物流在庫表</title>
 </head>
 <body>
@@ -18,17 +19,9 @@
         <div style="margin: 0 auto; width: 1100px;">
 
             <!-- メニュー -->
-            <div class="flex2">
-                <div><a href="{% url 'zaiko:index' %}">出荷依頼</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko:rireki_index' %}">履歴一覧</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:nyuuko_index' %}">入庫</a></div>
-            </div>
+            {% include "zaiko/menu.html" %}
             <hr>
         
-        
-
             <!-- 入力選択ボタン -->
             <div class="flex2 mt-5">
                 <div>
@@ -132,7 +125,7 @@
                     </div>
                     <div class="hissu">*</div>
                     <div style="margin-left: 50px;">担当者：</div>
-                    <div><input class="form-control" type="text" id="tantou"></div>
+                    <div><input class="form-control" type="text" id="tantou" style="width: 150px;"></div>
                     <div class="hissu">*</div>
                 </div>
 
@@ -143,7 +136,7 @@
                         <button type="button" class="btn btn-outline-dark" id="irai_zaiko" name="btn_irai" style="width: 200px;">物流在庫出荷</button>
                     </div>
                     <div style="margin-left: 50px;">
-                        <button type="button" class="btn btn-outline-dark" id="irai_keep" name="btn_irai" style="width: 200px;">キープ（2週間）</button>                       
+                        <button type="button" class="btn btn-outline-dark" id="irai_keep" name="btn_irai" style="width: 200px;">キープ（3週間）</button>                       
                     </div>
                     <div style="margin-left: 50px;">
                         <button type="button" class="btn btn-outline-dark" id="irai_catalog" name="btn_irai" style="width: 200px;">カタログ発送</button>

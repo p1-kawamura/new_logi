@@ -10,7 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <link rel="icon" href="{% static 'tamori.gif' %}">
+    <link rel="icon" href="{% static 'tora.gif' %}">
     <title>物流在庫（履歴一覧）</title>
 </head>
 <body>
@@ -19,15 +19,8 @@
         <div style="margin: 0 auto; width: 1100px;">
 
             <!-- メニュー -->
-            <div class="flex2">
-                <div><a href="{% url 'zaiko:index' %}">出荷依頼</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko:rireki_index' %}">履歴一覧</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:nyuuko_index' %}">入庫</a></div>
-            </div>
+            {% include "zaiko/menu.html" %}
             <hr>
-
 
             <!-- 検索フォーム -->
             <div class="mt-5" style="font-size: 0.9em;">
@@ -137,7 +130,7 @@
                     </div>
                     <div class="flex2 mt-4">
                         <div>顧客/加工場/店舗/柄名：</div>
-                        <div><input class="form-control form-control-sm" type="text" name="sr_cus" style="width: 200px;" value="{{ses.sr_cus}}" sr_form></div>
+                        <div><input class="form-control form-control-sm" type="text" name="sr_cus" style="width: 205px;" value="{{ses.sr_cus}}" sr_form></div>
                         <div style="margin-left: 30px;">電話番号：</div>
                         <div><input class="form-control form-control-sm" type="text" name="sr_tel" style="width: 120px;" value="{{ses.sr_tel}}" sr_form></div>                        
                         <div style="margin-left: 30px;">メールアドレス：</div>

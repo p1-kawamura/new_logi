@@ -20,6 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 def henshu_index(request):
     place_list=Place.objects.all()
     size_list=Size.objects.all()
+    request.session["zaiko"]["now_page"]="編集"
     params={
         "size_list":size_list,
         "place_list":place_list,
@@ -99,6 +100,7 @@ def henshu_excel_download(request):
 # サイズ画面
 def size_index(request):
     sizes=Size.objects.all().order_by("size_num")
+    request.session["zaiko"]["now_page"]="サイズ"
     return render(request,"zaiko2/size.html",{"sizes":sizes})
 
 
@@ -184,6 +186,7 @@ def size_same(request):
 def nyuuko_index(request):
     ses_item_list=request.session["zaiko"]["items2"]
     order_list=order_item_list(ses_item_list)
+    request.session["zaiko"]["now_page"]="入庫"
     return render(request,"zaiko2/nyuuko.html",{"order_list":order_list})
 
 
@@ -243,7 +246,7 @@ def nyuuko_send(request):
         ####### Irai_list #######
         Irai_list.objects.create(
             irai_num=irai_num,
-            shozoku="本社",
+            shozoku="物流センター",
             tantou=tantou,
             irai_type=3,
             irai_status=5,

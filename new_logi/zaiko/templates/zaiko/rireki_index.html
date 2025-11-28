@@ -10,7 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <link rel="icon" href="{% static 'tamori.gif' %}">   
+    <link rel="icon" href="{% static 'tora.gif' %}">   
     <title>物流在庫（履歴詳細）</title>
 </head>
 <body>
@@ -19,12 +19,7 @@
         <div style="margin: 0 auto; width: 1100px;">
             
             <!-- メニュー -->
-            <div class="flex2">
-                <div><a href="{% url 'zaiko:index' %}">出荷依頼</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko:rireki_index' %}">履歴一覧</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:henshu_index' %}">商品登録/編集</a></div>
-                <div style="margin-left: 50px;"><a href="{% url 'zaiko2:size_index' %}">サイズ登録</a></div>
-            </div>
+            {% include "zaiko/menu.html" %}
             <hr>
 
             <!-- タイトル -->
@@ -46,8 +41,8 @@
                         </div>
                         <div class="flex2 mt-2" style="align-items: end;">
                             <div>
-                                <div style="margin-top: 10px;">所属：<span id="shozoku">{{irai.shozoku}}</span></div>
-                                <div style="margin-top: 5px;">担当：<span id="tantou">{{irai.tantou}}</span></div>
+                                <div style="margin-top: 10px;">所属： <span id="shozoku">{{irai.shozoku}}</span></div>
+                                <div style="margin-top: 5px;">担当： <span id="tantou">{{irai.tantou}}</span></div>
                                 <div style="margin-top: 5px;">
                                     状態：
                                     {% if irai.irai_status == 0 %}
@@ -62,14 +57,39 @@
                                         キープ自動解除<span style="font-size: 0.9em;">（{{irai.cancel_day}}）</span>
                                     {% elif irai.irai_status == 5 %}
                                         入庫済
+                                    {% elif irai.irai_status == 6 %}
+                                        準備中
                                     {% endif %}
                                 </div>
                             </div>
-                            <!-- 発送待ちかキープ中のみ -->
-                            {% if irai.irai_status == 0 or irai.irai_status == 1 %}
-                            <div style="margin-left: 50px;">
-                                <button type="button" class="btn btn-outline-secondary" onclick="irai_cancel()">キャンセル</button>
-                            </div>
+
+                            <!-- 営業アカウント -->
+                            {% if request.user.username == "plus1" %}
+                                <!-- 発送待ち、キープ中 -->
+                                {% if irai.irai_status == 0 or irai.irai_status == 1 %}
+                                <div style="margin-left: 50px;">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="irai_cancel()">キャンセル</button>
+                                </div>
+                                {% endif %}
+
+                            <!-- 出荷アカウント -->
+                            {% elif request.user.username == "p1masao" %}
+                                <!-- 発送待ち、準備中、キープ中 -->
+                                {% if irai.irai_status == 0 or irai.irai_status == 1 or irai.irai_status == 6 %}
+                                <div class="flex2">
+                                    <div style="margin-left: 50px;">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="irai_cancel()">キャンセル</button>
+                                    </div>
+                                    <!-- 準備中 -->
+                                    {% if irai.irai_status == 6 %}
+                                    <div style="margin-left: 30px;">
+                                        <button type="button" class="btn btn-outline-success" onclick="irai_reset()">
+                                            <i class="bi bi-arrow-counterclockwise"></i> 発送待ち
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}                           
                             {% endif %}
                         </div>  
                     </div>
@@ -77,10 +97,10 @@
                     <!-- 在庫出荷とカタログ発送のみ -->
                     {% if irai.irai_type == 0 or irai.irai_type == 2 %}
                     <div class="flex2" style="margin-left: 50px; align-items: end;">
-                        <!-- 発送待ちのみ -->
-                        {% if irai.irai_status == 0 %}
+                        <!-- 発送待ち、準備中 -->
+                        {% if irai.irai_status == 0 or irai.irai_status == 6 %}
 
-                            {% if irai.hassou_type != 3 %}
+                            {% if irai.hassou_type != 3 and kanri == 1 %}
                             <div>
                                 <button type="submit" class="btn btn-danger" onclick="change_today()">当日出荷に変更</button>
                             </div>
@@ -391,6 +411,29 @@
                         window.alert("依頼をキャンセルしました！");
                     });
                 };
+            };
+        };
+
+
+        // 発送待ちに戻す
+        function irai_reset(){
+            var ans=confirm("発送待ちに戻しますか？");
+            if (ans){       
+                var irai_num=document.getElementById("irai_num").innerText;
+                var place=document.getElementById("place").innerText;            
+                $.ajax({
+                    'url': '{% url "zaiko:irai_reset" %}',
+                    'type': 'POST',
+                    'data': {
+                        'irai_num': irai_num,
+                        'place':place,
+                    },
+                    'dataType': 'json'
+                })
+                .done(function(response){
+                    window.location.reload();
+                    window.alert("ステータスを「発送待ち」に戻しました！");
+                });  
             };
         };
 

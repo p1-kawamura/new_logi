@@ -1,14 +1,16 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import index,hinban_enter,hinban_click,color_size_click,place_click,item_add,item_del,order_item_list,order_csv_check,csv_item_add, \
-                    zaiko_last_check,ajax_regular_day,irai_send_all,rireki_index,rireki_search,rireki_detail,irai_change_today,irai_cancel,irai_keep_hassou, \
+                    zaiko_last_check,ajax_regular_day,irai_send_all,rireki_index,rireki_search,rireki_detail,irai_change_today,irai_cancel, \
                     page_first,page_prev,page_next,page_last,download_excel_1,download_excel_2, \
-                    csv_imp,csv_imp_page,free
+                    irai_reset,irai_keep_hassou,csv_imp,csv_imp_page,free
 
 
 app_name="zaiko"
 urlpatterns = [
     path('', index, name="index"),
+    path('login/', auth_views.LoginView.as_view(template_name='zaiko/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('hinban_enter/', hinban_enter, name="hinban_enter"),
     path('hinban_click/', hinban_click, name="hinban_click"),
     path('color_size_click/', color_size_click, name="color_size_click"),
@@ -26,6 +28,7 @@ urlpatterns = [
     path('rireki_detail/<int:pk>', rireki_detail, name="rireki_detail"),
     path('irai_change_today/', irai_change_today, name="irai_change_today"),
     path('irai_cancel/', irai_cancel, name="irai_cancel"),
+    path('irai_reset/', irai_reset, name="irai_reset"),
     path('irai_keep_hassou/', irai_keep_hassou, name="irai_keep_hassou"),
     path('page_first/', page_first, name="page_first"),
     path('page_prev/', page_prev, name="page_prev"),

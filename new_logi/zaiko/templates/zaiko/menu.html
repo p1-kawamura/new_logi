@@ -1,0 +1,67 @@
+{% load static %}
+<!-- メニュー -->
+<div class="flex2">
+
+    <!-- 依頼側 -->
+    <div>
+        <a href="https://www.p1-intl.com/" target="_blank"><img src="{% static 'logo.png' %}"></a>
+    </div>
+    <div style="margin-left: 30px;">
+        <a href="{% url 'zaiko:index' %}">
+            {% if request.session.zaiko.now_page == "在庫" %}
+            <button type="button" class="btn btn-dark">
+            {% else %}
+            <button type="button" class="btn btn-outline-dark">
+            {% endif %}
+            物流在庫表</button>
+        </a>
+    </div>
+    <div style="margin-left: 30px;">
+        <a href="{% url 'zaiko:rireki_index' %}">
+            {% if request.session.zaiko.now_page == "一覧" %}
+            <button type="button" class="btn btn-dark">
+            {% else %}
+            <button type="button" class="btn btn-outline-dark">
+            {% endif %}
+            履歴一覧（修正 / キャンセル）</button>
+        </a>
+    </div>
+
+    <!-- 管理側 -->
+    {% if request.user.username == "p1masao" %}
+    <div style="margin-left: 30px;">
+        <a href="{% url 'zaiko2:henshu_index' %}">
+            {% if request.session.zaiko.now_page == "編集" %}
+            <button type="button" class="btn btn-dark">
+            {% else %}
+            <button type="button" class="btn btn-outline-dark">
+            {% endif %}
+            商品登録 / 編集</button>
+        </a>
+    </div>
+    <div style="margin-left: 30px;">
+        <a href="{% url 'zaiko2:size_index' %}">
+            {% if request.session.zaiko.now_page == "サイズ" %}
+            <button type="button" class="btn btn-dark">
+            {% else %}
+            <button type="button" class="btn btn-outline-dark">
+            {% endif %}
+            サイズ</button>
+        </a>
+    </div>
+    <div style="margin-left: 30px;">
+        <a href="{% url 'zaiko2:nyuuko_index' %}">
+            {% if request.session.zaiko.now_page == "入庫" %}
+            <button type="button" class="btn btn-dark">
+            {% else %}
+            <button type="button" class="btn btn-outline-dark">
+            {% endif %}
+            入庫処理</button>
+        </a>
+    </div>
+    <div style="margin-left: 30px;">
+        <a href="{% url 'admin:index' %}" target="_blank"><button type="button" class="btn btn-outline-danger">DB</button></a>
+    </div>
+    {% endif %}
+    
+</div>

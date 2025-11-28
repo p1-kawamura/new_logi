@@ -122,3 +122,25 @@
     font-size: 0.8em;
     width: 600px;
 }
+
+/* login */
+.login{
+    width: 300px;
+    padding: 0.5em 1em;
+    margin: 2em 0;
+    color: #647b5d;
+    border-top: solid 7px #198754;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.22);
+    margin: 0 auto;
+    margin-top: 200px;
+}
+.login_title {
+    color: #198754;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    padding: 0.3em 0;
+    border-top: solid 3px #198754;
+    border-bottom: solid 3px #198754;
+    background-color: #e7fdf3;
+}

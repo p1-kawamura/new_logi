@@ -126,6 +126,10 @@ SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
+LOGIN_URL = 'zaiko:login'
+LOGIN_REDIRECT_URL = 'zaiko:index'
+LOGOUT_REDIRECT_URL = 'zaiko:login'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

@@ -10,6 +10,7 @@ from django.http import FileResponse
 from django.conf import settings
 import jpholiday
 from django.db.models import Max
+from django.utils import timezone
 
 
 # 出荷作業依頼書_ダウンロード
@@ -48,7 +49,25 @@ def index(request):
         request.session["zaiko"]["items2"]=[]
     if "rireki_search" not in request.session["zaiko"]:
         request.session["zaiko"]["rireki_search"]={}
+    if "now_page" not in request.session["zaiko"]:
+        request.session["zaiko"]["now_page"]="在庫"
     
+
+    # キープ解除
+    ins=Irai_list.objects.filter(irai_status=1)
+    for i in ins:
+        if timezone.now() - i.irai_day >= timedelta(days=21):
+            i.irai_status=4
+            i.cancel_day=datetime.now().strftime("%Y年%m月%d日 %H:%M")
+            i.save()
+            ins_det=Irai_detail.objects.filter(irai_num=i.irai_num,place=i.place)
+            for h in ins_det:
+                ins_sho=Shouhin.objects.get(hontai_num=h.hontai_num)
+                ins_sho.keep -= h.kazu
+                ins_sho.available += h.kazu
+                ins_sho.save()
+
+    # 依頼商品一覧
     shozoku_list=Shozoku.objects.all()
     ses_item_list=request.session["zaiko"]["items"]
     order_list=order_item_list(ses_item_list)
@@ -66,6 +85,7 @@ def index(request):
     if regular_day < hurry_day:
         hurry_show=False
 
+    request.session["zaiko"]["now_page"]="在庫"
     params={
         "shozoku_list":shozoku_list,
         "order_list":order_list,
@@ -75,7 +95,7 @@ def index(request):
         "regular_att":regular_att,
         "hurry":get_day_show(hurry_day),
         "hurry_day":str(hurry_day),
-        "hurry_show":hurry_show
+        "hurry_show":hurry_show,
     }
     return render(request,"zaiko/index.html",params)
 
@@ -574,6 +594,7 @@ def rireki_index(request):
     num=request.session["zaiko"]["page_num"]
     irai_list=irai_list[(num-1)*30 : num*30]
 
+    request.session["zaiko"]["now_page"]="一覧"
     params={
         "irai_list":irai_list,
         "shozoku_list":shozoku_list,
@@ -631,6 +652,8 @@ def rireki_detail(request,pk):
     irai_num=ins.irai_num
     place=ins.place
     pk_count=Irai_list.objects.filter(irai_num=irai_num).count()
+
+    request.session["zaiko"]["now_page"]="詳細"
     params={
         "irai":Irai_list.objects.filter(pk=pk).values()[0],
         "shouhin_list":Irai_detail.objects.filter(irai_num=irai_num,place=place).values(),
@@ -672,6 +695,17 @@ def irai_cancel(request):
             ins2.keep -= i.kazu
         ins2.save()
 
+    d={}
+    return JsonResponse(d)
+
+
+# 発送待ちに戻す
+def irai_reset(request):
+    irai_num=request.POST.get("irai_num")
+    place=request.POST.get("place")
+    ins=Irai_list.objects.get(irai_num=irai_num,place=place)
+    ins.irai_status=0
+    ins.save()
     d={}
     return JsonResponse(d)
 
