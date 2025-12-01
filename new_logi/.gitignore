@@ -1,2 +1,27 @@
-# Django SQLite database
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtualenv
+venv/
+.env
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Django specific
 db.sqlite3
+media/
+staticfiles/
+
+# Coverage / Test
+.coverage
+htmlcov/
