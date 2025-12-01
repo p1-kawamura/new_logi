@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 # 編集画面
+@login_required
 def henshu_index(request):
     place_list=Place.objects.all()
     size_list=Size.objects.all()
@@ -98,6 +99,7 @@ def henshu_excel_download(request):
 
 
 # サイズ画面
+@login_required
 def size_index(request):
     sizes=Size.objects.all().order_by("size_num")
     request.session["zaiko"]["now_page"]="サイズ"
@@ -183,6 +185,7 @@ def size_same(request):
 
 
 # 入庫画面
+@login_required
 def nyuuko_index(request):
     ses_item_list=request.session["zaiko"]["items2"]
     order_list=order_item_list(ses_item_list)

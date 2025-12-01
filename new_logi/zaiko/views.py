@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect
 from .models import Shouhin,Place,Shozoku,Size,Irai_list,Irai_detail
+from django.contrib.auth.decorators import login_required
 import io
 import csv
 import json
@@ -32,6 +33,7 @@ def download_excel_2(request):
 
 
 # 在庫依頼_index
+@login_required
 def index(request):
     if "zaiko" not in request.session:
         request.session["zaiko"]={}
@@ -517,6 +519,7 @@ def irai_send_all(request):
 
 
 # 依頼履歴_一覧
+@login_required
 def rireki_index(request):
     shozoku_list=list(Shozoku.objects.all().values_list("shozoku",flat=True))
     place_list=list(Place.objects.filter(show=1).values_list("place",flat=True))
@@ -647,6 +650,7 @@ def page_last(request):
 
 
 # 依頼履歴_詳細
+@login_required
 def rireki_detail(request,pk):
     ins=Irai_list.objects.get(pk=pk)
     irai_num=ins.irai_num
