@@ -137,4 +137,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ※朝日町サーバー起動
-# waitress-serve --listen=192.168.91.147:8000 --threads 20 sfa_crm.wsgi:application
+# waitress-serve --listen=192.168.91.147:8000 --threads 20 new_logi.wsgi:application
