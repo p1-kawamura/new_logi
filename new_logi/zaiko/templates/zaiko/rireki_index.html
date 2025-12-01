@@ -46,11 +46,11 @@
                                 <div style="margin-top: 5px;">
                                     状態：
                                     {% if irai.irai_status == 0 %}
-                                        発送待ち
+                                        <span style="color: #008040; font-weight: bold;">発送待ち</span>
                                     {% elif irai.irai_status == 1 %}
                                         キープ中
                                     {% elif irai.irai_status == 2 %}
-                                        発送済
+                                        <span style="font-size: 1.2em;"><i class="bi bi-truck"></i></span> 発送済
                                     {% elif irai.irai_status == 3 %}
                                         キャンセル <span style="font-size: 0.9em;">（{{irai.cancel_day}}）</span>
                                     {% elif irai.irai_status == 4 %}
@@ -58,7 +58,7 @@
                                     {% elif irai.irai_status == 5 %}
                                         入庫済
                                     {% elif irai.irai_status == 6 %}
-                                        準備中
+                                        <span style="color: red;"><span style="font-size: 1.3em;"><i class="bi bi-cone-striped"></i></span> 準備中</span>
                                     {% endif %}
                                 </div>
                             </div>
