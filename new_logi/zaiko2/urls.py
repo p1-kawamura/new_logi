@@ -15,7 +15,6 @@ urlpatterns = [
     path('henshu_del', henshu_del, name="henshu_del"),
     path('henshu_excel_download', henshu_excel_download, name="henshu_excel_download"),
     path('size_index', size_index, name="size_index"),
-    path('size_index', size_index, name="size_index"),
     path('size_num_func', size_num_func, name="size_num_func"),
     path('size_new', size_new, name="size_new"),
     path('size_name', size_name, name="size_name"),
