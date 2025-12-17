@@ -21,6 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 def henshu_index(request):
     place_list=Place.objects.all()
     size_list=Size.objects.all()
+    print(list(size_list.values()))
     request.session["zaiko"]["now_page"]="編集"
     params={
         "size_list":size_list,
