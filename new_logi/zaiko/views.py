@@ -41,6 +41,8 @@ def index(request):
         request.session["zaiko"]["place"]="物流センター"
     if "items" not in request.session["zaiko"]:
         request.session["zaiko"]["items"]=[]
+    if "check_0" not in request.session["zaiko"]:
+        request.session["zaiko"]["check_0"]="0"
     if "page_num" not in request.session["zaiko"]:
         request.session["zaiko"]["page_num"]=1
     if "all_page_num" not in request.session["zaiko"]:
@@ -98,6 +100,7 @@ def index(request):
         "hurry":get_day_show(hurry_day),
         "hurry_day":str(hurry_day),
         "hurry_show":hurry_show,
+        "check_0":request.session["zaiko"]["check_0"],
     }
     return render(request,"zaiko/index.html",params)
 
@@ -146,10 +149,23 @@ def ajax_regular_day(request):
     return JsonResponse(d)
 
 
+# モーダル_発注可能数
+def check_0(request):
+    check_0=request.POST.get("check_0")
+    request.session["zaiko"]["check_0"]=check_0
+    d={}
+    return JsonResponse(d)
+
+
 # モーダル_品番検索に入力
 def hinban_enter(request):
     hinban_enter=request.POST.get("hinban_enter")
-    hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban_enter).values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())
+    modal_type=request.POST.get("modal_type")
+    check_0_ses=request.session["zaiko"]["check_0"]
+    if modal_type=="zaiko" and check_0_ses=="1":
+        hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban_enter,available__gt=0).values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())
+    else:
+        hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban_enter).values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())                         
     d={"hinban_list":hinban_list}
     return JsonResponse(d)
 
@@ -157,17 +173,32 @@ def hinban_enter(request):
 # モーダル_品番リストをクリック
 def hinban_click(request):
     hinban=request.POST.get("hinban")
-    color_list=list(Shouhin.objects.filter(shouhin_set=hinban).values_list("color",flat=True).order_by("color").distinct())
-    size_list=list(Shouhin.objects.filter(shouhin_set=hinban).values_list("size",flat=True).order_by("size_num").distinct())
+    modal_type=request.POST.get("modal_type")
+    check_0_ses=request.session["zaiko"]["check_0"]
     place_ok=list(Place.objects.filter(show=1))
-    place_list=list(Shouhin.objects.filter(shouhin_set=hinban,place__in=place_ok).values_list("place",flat=True).distinct())
+
+    if modal_type=="zaiko" and check_0_ses=="1":
+        color_list=list(Shouhin.objects.filter(shouhin_set=hinban,available__gt=0).values_list("color",flat=True).order_by("color").distinct())
+        size_list=list(Shouhin.objects.filter(shouhin_set=hinban,available__gt=0).values_list("size",flat=True).order_by("size_num").distinct())
+        place_list=list(Shouhin.objects.filter(shouhin_set=hinban,place__in=place_ok,available__gt=0).values_list("place",flat=True).distinct())
+    else:
+        color_list=list(Shouhin.objects.filter(shouhin_set=hinban).values_list("color",flat=True).order_by("color").distinct())
+        size_list=list(Shouhin.objects.filter(shouhin_set=hinban).values_list("size",flat=True).order_by("size_num").distinct())
+        place_list=list(Shouhin.objects.filter(shouhin_set=hinban,place__in=place_ok).values_list("place",flat=True).distinct())
+
+    place_dic={}
+    for i in place_list:
+        place_dic[i]=Place.objects.get(place=i).id
+    place_list=sorted(place_dic, key=place_dic.get)
+
     place="物流センター"
     request.session["zaiko"]["place"]="物流センター"
+    request.session["zaiko"]["place2"]="物流センター"
     ses_item_list=request.session["zaiko"]["items"]
 
     d={"color_list":color_list,
        "size_list":size_list,
-       "item_list":item_list(hinban,[],[],place),
+       "item_list":item_list(hinban,[],[],place,modal_type,check_0_ses),
        "place_list":place_list,
        "place":place,
        "ses_list":ses_list(ses_item_list)
@@ -182,26 +213,43 @@ def color_size_click(request):
     color=json.loads(color)
     size=request.POST.get("size")
     size=json.loads(size)
-    place=request.session["zaiko"]["place"]
-    ses_item_list=request.session["zaiko"]["items"]
+    modal_type=request.POST.get("modal_type")
+    check_0_ses=request.session["zaiko"]["check_0"]
+    if modal_type=="zaiko":
+        place=request.session["zaiko"]["place"]
+        ses_item_list=request.session["zaiko"]["items"]
+    else:
+        place=request.session["zaiko"]["place2"]
+        ses_item_list=request.session["zaiko"]["items2"]
     d={
-        "item_list":item_list(hinban,color,size,place),
+        "item_list":item_list(hinban,color,size,place,modal_type,check_0_ses),
         "ses_list":ses_list(ses_item_list)
         }
     return JsonResponse(d)
 
 
 # FUNC 商品リスト取得
-def item_list(hinban,color,size,place):
-    if len(color)==0 and len(size)==0:
-        item_list=list(Shouhin.objects.filter(shouhin_set=hinban,place=place).values().order_by("color","size_num"))
-    else:
-        if len(color)==0:
-            item_list=list(Shouhin.objects.filter(shouhin_set=hinban,size__in=size,place=place).values().order_by("color","size_num"))
-        elif len(size)==0:
-            item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,place=place).values().order_by("color","size_num"))
+def item_list(hinban,color,size,place,modal_type,check_0_ses):
+    if modal_type=="zaiko" and check_0_ses=="1":
+        if len(color)==0 and len(size)==0:
+            item_list=list(Shouhin.objects.filter(shouhin_set=hinban,place=place,available__gt=0).values().order_by("color","size_num"))
         else:
-            item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,size__in=size,place=place).values().order_by("color","size_num"))
+            if len(color)==0:
+                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,size__in=size,place=place,available__gt=0).values().order_by("color","size_num"))
+            elif len(size)==0:
+                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,place=place,available__gt=0).values().order_by("color","size_num"))
+            else:
+                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,size__in=size,place=place,available__gt=0).values().order_by("color","size_num"))
+    else:
+        if len(color)==0 and len(size)==0:
+            item_list=list(Shouhin.objects.filter(shouhin_set=hinban,place=place).values().order_by("color","size_num"))
+        else:
+            if len(color)==0:
+                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,size__in=size,place=place).values().order_by("color","size_num"))
+            elif len(size)==0:
+                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,place=place).values().order_by("color","size_num"))
+            else:
+                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,size__in=size,place=place).values().order_by("color","size_num"))
 
     return item_list
 
@@ -222,16 +270,28 @@ def place_click(request):
     size=request.POST.get("size")
     size=json.loads(size)
     place=request.POST.get("place")
-    request.session["zaiko"]["place"]=place
+    modal_type=request.POST.get("modal_type")
+    check_0_ses=request.session["zaiko"]["check_0"]
+
     place_ok=list(Place.objects.filter(show=1))
     place_list=list(Shouhin.objects.filter(shouhin_set=hinban,place__in=place_ok).values_list("place",flat=True).distinct())
-    modal_type=request.POST.get("modal_type")
-    if modal_type == "zaiko":
+
+    if modal_type=="zaiko":
+        request.session["zaiko"]["place"]=place
         ses_item_list=request.session["zaiko"]["items"]
+        if check_0_ses=="1":
+            place_list=list(Shouhin.objects.filter(shouhin_set=hinban,place__in=place_ok,available__gt=0).values_list("place",flat=True).distinct())
     else:
+        request.session["zaiko"]["place2"]=place
         ses_item_list=request.session["zaiko"]["items2"]
+    
+    place_dic={}
+    for i in place_list:
+        place_dic[i]=Place.objects.get(place=i).id
+    place_list=sorted(place_dic, key=place_dic.get)
+    
     d={
-        "item_list":item_list(hinban,color,size,place),
+        "item_list":item_list(hinban,color,size,place,modal_type,check_0_ses),
         "place_list":place_list,
         "place":place,
         "ses_list":ses_list(ses_item_list)
@@ -249,6 +309,7 @@ def item_add(request):
     size=request.POST.get("size")
     size=json.loads(size)
     modal_type=request.POST.get("modal_type")
+    check_0_ses=request.session["zaiko"]["check_0"]
 
     if modal_type == "zaiko":
         ses_item_list=request.session["zaiko"]["items"]
@@ -268,7 +329,7 @@ def item_add(request):
     d={
         "order_list":order_item_list(ses_item_list),
         "ses_list":ses_list(ses_item_list),
-        "item_list":item_list(hinban,color,size,place)
+        "item_list":item_list(hinban,color,size,place,modal_type,check_0_ses)
         }
     return JsonResponse(d)
 

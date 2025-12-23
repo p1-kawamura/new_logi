@@ -41,8 +41,42 @@ def henshu_hinban_enter(request):
 def henshu_hinban_click(request):
     hinban=request.POST.get("hinban")
     item_list=list(Shouhin.objects.filter(shouhin_set=hinban).order_by("color","size_num").values())
-    d={"item_list":item_list}
+    color_list=list(Shouhin.objects.filter(shouhin_set=hinban).values_list("color",flat=True).order_by("color").distinct())
+    size_list=list(Shouhin.objects.filter(shouhin_set=hinban).values_list("size",flat=True).order_by("size_num").distinct())
+    d={
+        "item_list":item_list,
+        "color_list":color_list,
+        "size_list":size_list,
+        }
     return JsonResponse(d)
+
+
+# 編集_モーダル_カラー、サイズをクリック
+def henshu_color_size_click(request):
+    hinban=request.POST.get("hinban")
+    color=request.POST.get("color")
+    color=json.loads(color)
+    size=request.POST.get("size")
+    size=json.loads(size)
+    d={
+        "item_list":item_list(hinban,color,size),
+        }
+    return JsonResponse(d)
+
+
+# FUNC 商品リスト取得
+def item_list(hinban,color,size):
+    if len(color)==0 and len(size)==0:
+        item_list=list(Shouhin.objects.filter(shouhin_set=hinban).values().order_by("color","size_num"))
+    else:
+        if len(color)==0:
+            item_list=list(Shouhin.objects.filter(shouhin_set=hinban,size__in=size).values().order_by("color","size_num"))
+        elif len(size)==0:
+            item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color).values().order_by("color","size_num"))
+        else:
+            item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,size__in=size).values().order_by("color","size_num"))
+
+    return item_list
 
 
 # 編集_リストクリック

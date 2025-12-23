@@ -366,6 +366,14 @@
                             <div class="flex2">
                                 <div><i class="bi bi-search"></i> 商品検索：</div>
                                 <div style="width: 500px;"><input class="form-control" type="text" id="hinban_enter"></div>
+                                <div style="margin-left: 30px;">
+                                    {% if check_0 == "1" %}
+                                    <input class="form-check" type="checkbox" id="check_0" checked>
+                                    {% else %}
+                                    <input class="form-check" type="checkbox" id="check_0">
+                                    {% endif %}
+                                </div>
+                                <div style="margin-left: 5px; font-size: 0.9em;">発注可能数が 0枚のSKUは表示しない</div>                                
                             </div>
                             <div class="flex2 mt-4" style="font-size: 0.9em;">
                                 <div>
@@ -559,6 +567,26 @@
         }
 
 
+        // モーダル_可能数0
+        var doc_check_0 = document.getElementById("check_0");
+        doc_check_0.addEventListener("click",function(){
+            if (doc_check_0.checked){
+                check_0 = 1;
+            } else {
+                check_0 = 0;
+            }
+            $.ajax({
+                'url': '{% url "zaiko:check_0" %}',
+                'type': 'POST',
+                'data': {'check_0': check_0},
+                'dataType': 'json'
+            })
+            .done(function(response){
+                hinban_click();
+            });
+        });
+
+
         //モーダル_品番検索
         var hinban_enter = document.getElementById("hinban_enter");
         hinban_enter.addEventListener("input",function(){
@@ -574,7 +602,10 @@
             $.ajax({
                 'url': '{% url "zaiko:hinban_enter" %}',
                 'type': 'POST',
-                'data': {'hinban_enter': hinban_enter.value},
+                'data': {
+                    'hinban_enter': hinban_enter.value,
+                    'modal_type':"zaiko"
+                    },
                 'dataType': 'json'
             })
             .done(function(response){
@@ -599,7 +630,10 @@
                 $.ajax({
                     'url': '{% url "zaiko:hinban_click" %}',
                     'type': 'POST',
-                    'data': {'hinban': hinban.value}, 
+                    'data': {
+                        'hinban': hinban.value,
+                        'modal_type':"zaiko"
+                        }, 
                     'dataType': 'json'
                 })
                 .done(function(response){
@@ -671,6 +705,7 @@
                     'hinban': dic.hinban,
                     'color':dic.color,
                     'size':dic.size,
+                    'modal_type':"zaiko",
                     },
                 'dataType': 'json'
             })

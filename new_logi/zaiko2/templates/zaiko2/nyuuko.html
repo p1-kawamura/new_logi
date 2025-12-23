@@ -209,7 +209,10 @@
             $.ajax({
                 'url': '{% url "zaiko:hinban_enter" %}',
                 'type': 'POST',
-                'data': {'hinban_enter': hinban_enter.value},
+                'data': {
+                    'hinban_enter': hinban_enter.value,
+                    'modal_type':"zaiko2"
+                    },
                 'dataType': 'json'
             })
             .done(function(response){
@@ -234,7 +237,10 @@
                 $.ajax({
                     'url': '{% url "zaiko:hinban_click" %}',
                     'type': 'POST',
-                    'data': {'hinban': hinban.value}, 
+                    'data': {
+                        'hinban': hinban.value,
+                        'modal_type':"zaiko2"
+                        }, 
                     'dataType': 'json'
                 })
                 .done(function(response){
@@ -306,6 +312,7 @@
                     'hinban': dic.hinban,
                     'color':dic.color,
                     'size':dic.size,
+                    'modal_type':"zaiko2",
                     },
                 'dataType': 'json'
             })
