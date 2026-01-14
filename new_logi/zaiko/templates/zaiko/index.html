@@ -27,7 +27,7 @@
                 <div>
                     <button type="button" class="btn btn-outline-primary main_btn" id="shouhin_manual" data-bs-toggle="modal" data-bs-target="#manual_modal">
                         <span style="font-size: 1.5em;"><i class="bi bi-cart-plus"></i></span>
-                        <span style="font-size: 1.2em; margin-left: 7px;">出荷依頼 / 在庫確認 / キープ / カタログ発送</span>
+                        <span style="font-size: 1.2em; margin-left: 7px;">出荷依頼 / 在庫確認 / キープ / 資材・カタログ発送</span>
                     </button>
                 </div>
                 <div style="margin-left: 50px;">
@@ -39,14 +39,12 @@
                 <div style="margin-left: 50px;">
                     <div>
                         <a href="{% url 'zaiko:download_excel_1' %}">
-                            <button type="button" class="btn btn-outline-dark"><i class="bi bi-google"></i> 出荷作業依頼書</button>   
+                            <button type="button" class="btn btn-outline-dark main_btn">
+                                <span style="font-size: 1.5em;"><i class="bi bi-filetype-xlsx"></i></span>
+                                <span style="font-size: 1.2em; margin-left: 7px;">出荷作業依頼書</span>
+                            </button>   
                         </a>
-                    </div>
-                    <div style="margin-top: 20px;">
-                        <a href="{% url 'zaiko:download_excel_2' %}">
-                            <button type="button" class="btn btn-outline-dark"><i class="bi bi-google"></i> 資材・カタログ出荷依頼</button>  
-                        </a>
-                    </div>                   
+                    </div>                 
                 </div>
             </div>
 
@@ -133,13 +131,13 @@
                 <div class="irai_title mt-5" style="width: 100px;">依頼内容</div>
                 <div class="flex2 mt-4">
                     <div>
-                        <button type="button" class="btn btn-outline-dark" id="irai_zaiko" name="btn_irai" style="width: 200px;">物流在庫出荷</button>
+                        <button type="button" class="btn btn-outline-dark" id="irai_zaiko" name="btn_irai" style="width: 200px;">商品在庫発送</button>
                     </div>
                     <div style="margin-left: 50px;">
                         <button type="button" class="btn btn-outline-dark" id="irai_keep" name="btn_irai" style="width: 200px;">キープ（3週間）</button>                       
                     </div>
                     <div style="margin-left: 50px;">
-                        <button type="button" class="btn btn-outline-dark" id="irai_catalog" name="btn_irai" style="width: 200px;">カタログ発送</button>
+                        <button type="button" class="btn btn-outline-dark" id="irai_catalog" name="btn_irai" style="width: 200px;">資材・カタログ発送</button>
                     </div>
                 </div>
                 

@@ -2,7 +2,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import index,check_0,hinban_enter,hinban_click,color_size_click,place_click,item_add,item_del,order_item_list,order_csv_check,csv_item_add, \
                     zaiko_last_check,ajax_regular_day,irai_send_all,rireki_index,rireki_search,rireki_detail,irai_change_today,irai_cancel, \
-                    page_first,page_prev,page_next,page_last,download_excel_1,download_excel_2, \
+                    page_first,page_prev,page_next,page_last,download_excel_1, \
                     irai_reset,irai_keep_hassou,csv_imp,csv_imp_page,free
 
 
@@ -37,7 +37,6 @@ urlpatterns = [
     path('page_last/', page_last, name="page_last"),
 
     path('download_excel_1/', download_excel_1, name="download_excel_1"),
-    path('download_excel_2/', download_excel_2, name="download_excel_2"),
     path('csv_imp/', csv_imp, name="csv_imp"),
     path('csv_imp_page/', csv_imp_page, name="csv_imp_page"),
     path('free/', free, name="free"),

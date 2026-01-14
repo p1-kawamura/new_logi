@@ -80,7 +80,7 @@
                             </select>
                         </div>
                         <div style="margin-left: 10px;">
-                            <select class="form-select form-select-sm" name="sr_naiyou_2" id="sr_naiyou_2" style="width: 100px;">
+                            <select class="form-select form-select-sm" name="sr_naiyou_2" id="sr_naiyou_2" style="width: 80px;">
                                 <option></option>
                                 {% if ses.sr_naiyou_1 == "0" %}
                                     {% for i,h in sr_naiyou_2_zaiko.items %}
@@ -186,7 +186,7 @@
                                     {% elif i.irai_type == 1 %}
                                         キープ
                                     {% elif i.irai_type == 2 %}
-                                        カタログ発送<br>
+                                        資材・カタログ発送<br>
                                         {% if i.catalog_type == "tempo" %}
                                             （店舗あて）
                                         {% elif i.catalog_type == "cus" %}

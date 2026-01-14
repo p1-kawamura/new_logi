@@ -16,19 +16,10 @@ from django.utils import timezone
 
 # 出荷作業依頼書_ダウンロード
 def download_excel_1(request):
-    file_path = os.path.join(settings.MEDIA_ROOT, 'excel', '★出荷作業依頼書（原紙）.xlsm')
+    file_path = os.path.join(settings.MEDIA_ROOT, 'excel', '★出荷作業依頼書（原紙）.xlsx')
     os.path.exists(file_path)
-    response = FileResponse(open(file_path, 'rb'), as_attachment=True, filename='★出荷作業依頼書（原紙）.xlsm')
-    response['Content-Type'] = 'application/vnd.ms-excel.sheet.macroEnabled.12'
-    return response
-
-
-# 資材・カタログ出荷依頼_ダウンロード
-def download_excel_2(request):
-    file_path = os.path.join(settings.MEDIA_ROOT, 'excel', '資材・カタログ出荷依頼（社内・原紙）.xlsm')
-    os.path.exists(file_path)
-    response = FileResponse(open(file_path, 'rb'), as_attachment=True, filename='資材・カタログ出荷依頼（社内・原紙）.xlsm')
-    response['Content-Type'] = 'application/vnd.ms-excel.sheet.macroEnabled.12'
+    response = FileResponse(open(file_path, 'rb'), as_attachment=True, filename='★出荷作業依頼書（原紙）.xlsx')
+    response['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     return response
 
 
@@ -640,7 +631,7 @@ def rireki_index(request):
         irai_list=Irai_list.objects.filter(**fil).order_by("irai_num").reverse()
 
     sr_hassou_type={"1":"通常便","2":"お急ぎ便","3":"当日出荷"}
-    sr_naiyou_1={"0":"在庫出荷","1":"キープ","2":"カタログ発送","3":"入庫"}
+    sr_naiyou_1={"0":"商品在庫発送","1":"キープ","2":"資材・カタログ発送","3":"入庫"}
     sr_naiyou_2_zaiko={"kakou":"加工あり","muji":"無地"}
     sr_naiyou_2_catalog={"tempo":"店舗あて","cus":"顧客あて"}
     sr_status={"0":"発送待ち","2":"発送済み","1":"キープ中","4":"キープ解除","3":"キャンセル","6":"準備中"}
