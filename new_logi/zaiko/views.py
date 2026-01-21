@@ -357,8 +357,8 @@ def order_csv_check(request):
     rows=text.split("\n")
 
     order_list=[]
-    if rows[0].split(",") == ['品番', '商品名', 'カラー', 'カラーコード', 'サイズ', 'サイズコード', 
-                              '数量', '見積番号', 'SKU', '納入先', '入荷予定日', '発送伝票備考', '加工発注番号-バージョン', '商品発注番号\r']:
+    if rows[0]=="品番,商品名,カラー,カラーコード,サイズ,サイズコード,数量,見積番号,SKU,納入先,入荷予定日,発送伝票備考,加工発注番号-バージョン,商品発注番号\r" or \
+        rows[0]=="品番,商品名（商品名＋カラー＋サイズ）,カラー,カラーコード,サイズ,サイズコード,数量,見積番号,JAN,納入先,入荷予定日\r":
         for i in range(1,len(rows)-1):
             row_list=rows[i].split(",")
             order_list.append({"hinmei":row_list[1],"jan_code":row_list[8],"kazu":row_list[6]})

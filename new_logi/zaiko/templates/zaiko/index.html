@@ -532,7 +532,7 @@
                     if (response.order_csv.length==0){
                         str="<div class='alert alert-danger d-flex align-items-center' role='alert'>" +
                             "<svg class='bi flex-shrink-0 me-2' width='24' height='24'><use xlink:href='#exclamation-triangle-fill'/></svg>" +
-                            "<div>CSVファイルの項目が違います！</div></div>";
+                            "<div>CSVファイルの項目が一致しません！</div></div>";
                     } else {                        
                         for (var i of response.order_csv){
                             var result="";
