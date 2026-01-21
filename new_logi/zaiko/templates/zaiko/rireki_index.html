@@ -99,8 +99,8 @@
                     <div class="flex2" style="margin-left: 50px; align-items: end;">
                         <!-- 発送待ち、準備中 -->
                         {% if irai.irai_status == 0 or irai.irai_status == 6 %}
-
-                            {% if irai.hassou_type != 3 and kanri == 1 %}
+                            
+                            {% if irai.hassou_type != 3 and request.user.username == "p1masao" %}
                             <div>
                                 <button type="submit" class="btn btn-danger" onclick="change_today()">当日出荷に変更</button>
                             </div>
