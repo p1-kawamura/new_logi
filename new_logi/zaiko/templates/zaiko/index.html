@@ -429,8 +429,9 @@
                         <!-- body -->
                         <div class="modal-body">
                             <div id="dropzone" style="border: 2px dashed #ccc; padding: 30px;">
-                                ここにCSVファイルをドロップしてください
+                                ここにCSVファイルをドラッグ＆ドロップするか、またはクリックしてファイルを選択してください。
                             </div>
+                            <input type="file" id="fileInput" style="display:none;">
                             <div id="csv_result" style="margin-top: 10px;"></div>
                         </div>
                         <!-- footer -->
@@ -488,7 +489,20 @@
 
         // モーダル_発注CSV
         const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
 
+        // クリックでファイル選択
+        dropzone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // ファイル選択時の処理
+        fileInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            handleFile(file);
+        });
+
+        // ドラッグ＆ドロップ処理
         dropzone.addEventListener('dragover', e => {
             e.preventDefault();
             dropzone.style.background = '#eef';
@@ -497,16 +511,21 @@
         dropzone.addEventListener('drop', e => {
             e.preventDefault();
             const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
+
+        // 共通のファイル処理
+        function handleFile(file) {
             const reader = new FileReader();
-            reader.readAsText(file,"Shift_JIS");
+            reader.readAsText(file, "Shift_JIS");
             reader.onload = () => {
                 const text = reader.result;
-                
+
                 $.ajax({
-                    'url': '{% url "zaiko:order_csv_check" %}',
-                    'type': 'POST',
-                    'data': {"text":text},
-                    'dataType': 'json'
+                    url: '{% url "zaiko:order_csv_check" %}',
+                    type: 'POST',
+                    data: { "text": text },
+                    dataType: 'json'
                 })
                 .done(function(response){
                     var str="";
@@ -535,7 +554,7 @@
                     document.getElementById("csv_result").innerHTML=str;
                 });
             };
-        });
+        }
 
 
         // モーダル_発注CSV_追加
