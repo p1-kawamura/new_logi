@@ -355,28 +355,31 @@ def order_csv_check(request):
     text=request.POST.get("text")
     text=text.replace('"','')
     rows=text.split("\n")
-    order_list=[]
-    for i in range(1,len(rows)-1):
-        row_list=rows[i].split(",")
-        order_list.append({"hinmei":row_list[1],"jan_code":row_list[8],"kazu":row_list[6]})
 
-    for i in order_list:
-        ins=Shouhin.objects.filter(jan_code=i["jan_code"],sys_order=1)
-        if ins.count()>1:
-            i["result"]="JAN重複"
-        elif ins.count()==0:
-            i["result"]="連動"
-        else:
-            ses_item_list=request.session["zaiko"]["items"]
-            ses_lists=ses_list(ses_item_list)
-            if str(ins[0].hontai_num) in ses_lists:
-                i["result"]="リスト"
-            elif ins[0].available < int(i["kazu"]):
-                i["result"]="在庫"
+    order_list=[]
+    if rows[0].split(",") == ['品番', '商品名', 'カラー', 'カラーコード', 'サイズ', 'サイズコード', 
+                              '数量', '見積番号', 'SKU', '納入先', '入荷予定日', '発送伝票備考', '加工発注番号-バージョン', '商品発注番号\r']:
+        for i in range(1,len(rows)-1):
+            row_list=rows[i].split(",")
+            order_list.append({"hinmei":row_list[1],"jan_code":row_list[8],"kazu":row_list[6]})
+
+        for i in order_list:
+            ins=Shouhin.objects.filter(jan_code=i["jan_code"],sys_order=1)
+            if ins.count()>1:
+                i["result"]="JAN重複"
+            elif ins.count()==0:
+                i["result"]="連動"
             else:
-                i["result"]="OK"
-                i["hontai_kazu"]="csv_" + str(ins[0].hontai_num) + "_" + str(i["kazu"])
-    
+                ses_item_list=request.session["zaiko"]["items"]
+                ses_lists=ses_list(ses_item_list)
+                if str(ins[0].hontai_num) in ses_lists:
+                    i["result"]="リスト"
+                elif ins[0].available < int(i["kazu"]):
+                    i["result"]="在庫"
+                else:
+                    i["result"]="OK"
+                    i["hontai_kazu"]="csv_" + str(ins[0].hontai_num) + "_" + str(i["kazu"])
+
     d={"order_csv":order_list}
     return JsonResponse(d)
 
