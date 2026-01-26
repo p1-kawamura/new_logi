@@ -802,42 +802,7 @@ def csv_imp_page(request):
 
 
 def csv_imp(request):
-    # #在庫リスト
-    # data = io.TextIOWrapper(request.FILES['csv1'].file, encoding="cp932")
-    # csv_content = csv.reader(data)
-    # csv_list=list(csv_content)
-        
-    # h=0
-    # for i in csv_list:
-    #     if h!=0:
-    #         Shouhin.objects.update_or_create(
-    #             hontai_num=i[0],
-    #             defaults={
-    #                 "hontai_num":i[0],
-    #                 "place":i[1],
-    #                 "shouhin_num":i[2],
-    #                 "shouhin_name":i[3],
-    #                 "shouhin_set":i[4],
-    #                 "color":i[5],
-    #                 "size":i[6],
-    #                 "size_num":i[7],
-    #                 "available":i[8],
-    #                 "keep":i[9],
-    #                 "stock":i[10],
-    #                 "tana":i[11],
-    #                 "cost_price":i[12],
-    #                 "bikou":i[13],
-    #                 "attention":i[14],
-    #                 "create_day":i[15],
-    #                 "jan_code":i[16],
-    #                 "sys_stock":i[17],
-    #                 "sys_order":i[18],
-    #             }            
-    #         )
-    #     h+=1
-
-
-    #サイズ表
+    #在庫リスト
     data = io.TextIOWrapper(request.FILES['csv1'].file, encoding="cp932")
     csv_content = csv.reader(data)
     csv_list=list(csv_content)
@@ -845,8 +810,43 @@ def csv_imp(request):
     h=0
     for i in csv_list:
         if h!=0:
-            Size.objects.create(size_num=i[0],size=i[1])
+            Shouhin.objects.update_or_create(
+                hontai_num=i[0],
+                defaults={
+                    "hontai_num":i[0],
+                    "place":i[1],
+                    "shouhin_num":i[2],
+                    "shouhin_name":i[3],
+                    "shouhin_set":i[4],
+                    "color":i[5],
+                    "size":i[6],
+                    "size_num":i[7],
+                    "available":i[8],
+                    "keep":i[9],
+                    "stock":i[10],
+                    "tana":i[11],
+                    "cost_price":i[12],
+                    "bikou":i[13],
+                    "attention":i[14],
+                    "create_day":i[15],
+                    "jan_code":i[16],
+                    "sys_stock":i[17],
+                    "sys_order":i[18],
+                }            
+            )
         h+=1
+
+
+    # #サイズ表
+    # data = io.TextIOWrapper(request.FILES['csv1'].file, encoding="cp932")
+    # csv_content = csv.reader(data)
+    # csv_list=list(csv_content)
+        
+    # h=0
+    # for i in csv_list:
+    #     if h!=0:
+    #         Size.objects.create(size_num=i[0],size=i[1])
+    #     h+=1
 
     return redirect("zaiko:csv_imp_page")
 
@@ -854,6 +854,7 @@ def csv_imp(request):
 # 自由コード
 def free(request):
     Size.objects.all().delete()
+    Shouhin.objects.all().delete()
 
     # request.session.clear()  
     return redirect("zaiko:index")
