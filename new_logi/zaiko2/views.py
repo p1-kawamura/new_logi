@@ -388,4 +388,11 @@ def vba_hassou_data(request):
             return JsonResponse({"error": str(e)}, status=400)
     else:
         return JsonResponse({"error": "POST only"}, status=405)
-    
+
+
+# VBA_在庫リスト取得
+@csrf_exempt
+def vba_zaiko_list(request):
+    ins=Shouhin.objects.filter(sys_stock=1)
+    res_dic={"list":list(ins.values())}
+    return JsonResponse(res_dic,status=200)
