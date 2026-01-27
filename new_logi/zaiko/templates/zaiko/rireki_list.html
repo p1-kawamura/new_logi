@@ -215,6 +215,8 @@
                                 </td>
                                 {% if i.hassou_type == 3 and i.irai_status == 0 %}
                                 <td style="color: #ff0000; background-color: #ffe1e1; white-space: nowrap;">
+                                {% elif i.hassou_type == 3 and i.irai_status == 6 %}
+                                <td style="color: #ff0000; background-color: #ffe1e1; white-space: nowrap;">
                                 {% else %}
                                 <td style="white-space: nowrap;">
                                 {% endif %}
