@@ -317,6 +317,8 @@ def item_add(request):
     else:
         request.session["zaiko"]["items2"]=ses_item_list
 
+    print(datetime.now(),"商品モーダル",request.user)
+
     d={
         "order_list":order_item_list(ses_item_list),
         "ses_list":ses_list(ses_item_list),
@@ -393,6 +395,8 @@ def csv_item_add(request):
     for i in item_lists:
         ses_item_list.append(i)
     request.session["zaiko"]["items"]=ses_item_list
+
+    print(datetime.now(),"発注CSV取込",request.user)
 
     d={"order_list":order_item_list(ses_item_list)}
     return JsonResponse(d)
@@ -651,6 +655,8 @@ def rireki_index(request):
     request.session["zaiko"]["all_page_num"]=all_num
     num=request.session["zaiko"]["page_num"]
     irai_list=irai_list[(num-1)*30 : num*30]
+
+    print(datetime.now(),"履歴一覧",request.user)
 
     request.session["zaiko"]["now_page"]="一覧"
     params={

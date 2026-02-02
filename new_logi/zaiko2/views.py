@@ -22,6 +22,9 @@ def henshu_index(request):
     place_list=Place.objects.all()
     size_list=Size.objects.all()
     request.session["zaiko"]["now_page"]="編集"
+
+    print(datetime.datetime.now(),"商品登録/編集",request.user)
+
     params={
         "size_list":size_list,
         "place_list":place_list,
