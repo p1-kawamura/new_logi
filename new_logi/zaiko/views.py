@@ -718,10 +718,15 @@ def rireki_detail(request,pk):
     place=ins.place
     pk_count=Irai_list.objects.filter(irai_num=irai_num).count()
 
+    if ins.irai_type==3: #入庫の場合
+        shouhin_list=Irai_detail.objects.filter(irai_num=irai_num).values()
+    else:
+        shouhin_list=Irai_detail.objects.filter(irai_num=irai_num,place=place).values()
+
     request.session["zaiko"]["now_page"]="詳細"
     params={
         "irai":Irai_list.objects.filter(pk=pk).values()[0],
-        "shouhin_list":Irai_detail.objects.filter(irai_num=irai_num,place=place).values(),
+        "shouhin_list":shouhin_list,
         "pk_count":pk_count,
     }
     return render(request,"zaiko/rireki_index.html",params)

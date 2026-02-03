@@ -290,6 +290,7 @@ def nyuuko_send(request):
             tantou=tantou,
             irai_type=3,
             irai_status=5,
+            place="全拠点",
         )
 
         ####### 商品 #######
