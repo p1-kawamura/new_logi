@@ -381,7 +381,9 @@ def order_csv_check(request):
                 else:
                     i["result"]="OK"
                     i["hontai_kazu"]="csv_" + str(ins[0].hontai_num) + "_" + str(i["kazu"])
-
+    
+    print(datetime.now(),"発注CSV取込",request.user)
+    
     d={"order_csv":order_list}
     return JsonResponse(d)
 
@@ -394,9 +396,7 @@ def csv_item_add(request):
 
     for i in item_lists:
         ses_item_list.append(i)
-    request.session["zaiko"]["items"]=ses_item_list
-
-    print(datetime.now(),"発注CSV取込",request.user)
+    request.session["zaiko"]["items"]=ses_item_list 
 
     d={"order_list":order_item_list(ses_item_list)}
     return JsonResponse(d)
