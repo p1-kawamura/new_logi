@@ -240,14 +240,14 @@ def item_list(hinban,color,size,place,modal_type,check_0_ses):
                 item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,size__in=size,place=place,available__gt=0).values().order_by("color","size_num"))
     else:
         if len(color)==0 and len(size)==0:
-            item_list=list(Shouhin.objects.filter(shouhin_set=hinban,place=place).values().order_by("color","size_num"))
+            item_list=list(Shouhin.objects.filter(shouhin_set=hinban).values().order_by("color","size_num"))
         else:
             if len(color)==0:
-                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,size__in=size,place=place).values().order_by("color","size_num"))
+                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,size__in=size).values().order_by("color","size_num"))
             elif len(size)==0:
-                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,place=place).values().order_by("color","size_num"))
+                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color).values().order_by("color","size_num"))
             else:
-                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,size__in=size,place=place).values().order_by("color","size_num"))
+                item_list=list(Shouhin.objects.filter(shouhin_set=hinban,color__in=color,size__in=size).values().order_by("color","size_num"))
 
     return item_list
 
