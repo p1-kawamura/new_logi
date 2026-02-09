@@ -153,10 +153,17 @@ def hinban_enter(request):
     hinban_enter=request.POST.get("hinban_enter")
     modal_type=request.POST.get("modal_type")
     check_0_ses=request.session["zaiko"]["check_0"]
-    if modal_type=="zaiko" and check_0_ses=="1":
-        hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban_enter,available__gt=0).values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())
+    place_ok=list(Place.objects.filter(show=1))
+
+    if modal_type=="zaiko":
+        hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban_enter,place__in=place_ok)
+                         .values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())
+        if check_0_ses=="1":
+            hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban_enter,place__in=place_ok,available__gt=0)
+                             .values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())
     else:
-        hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban_enter).values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())                         
+        hinban_list=list(Shouhin.objects.filter(shouhin_set__icontains=hinban_enter)
+                         .values_list("shouhin_set",flat=True).order_by("shouhin_set").distinct())                         
     d={"hinban_list":hinban_list}
     return JsonResponse(d)
 
