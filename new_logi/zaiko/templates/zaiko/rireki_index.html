@@ -187,11 +187,11 @@
                                 </tr>
                                 <tr>
                                     <td>加工場 / 店舗</td>
-                                    <td>{{irai.zaiko_kakouba}}</td>
+                                    <td>{% if request.user.username != "plus1_fc" %}{{irai.zaiko_kakouba}}{% endif %}</td>
                                 </tr>
                                 <tr>
                                     <td>柄名</td>
-                                    <td>{{irai.zaiko_gara}}</td>
+                                    <td>{% if request.user.username != "plus1_fc" %}{{irai.zaiko_gara}}{% endif %}</td>
                                 </tr>
                             {% elif irai.zaiko_type == "muji" %}
                                 <tr>

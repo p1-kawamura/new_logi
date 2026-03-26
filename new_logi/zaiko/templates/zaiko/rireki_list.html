@@ -199,7 +199,9 @@
                                 <td>
                                     {% if i.irai_type == 0 %}
                                         {% if i.zaiko_type == "kakou" %}
-                                            {{i.zaiko_kakouba}}<br>{{i.zaiko_gara}}
+                                            {% if request.user.username != "plus1_fc" %}
+                                                {{i.zaiko_kakouba}}<br>{{i.zaiko_gara}}
+                                            {% endif %}
                                         {% elif i.zaiko_type == "muji" %}
                                             {{i.zaiko_cus}}<br>{{i.zaiko_system}}
                                         {% endif %}
