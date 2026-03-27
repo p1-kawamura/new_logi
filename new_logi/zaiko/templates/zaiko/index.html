@@ -24,13 +24,20 @@
         
             <!-- 入力選択ボタン -->
             <div class="flex2 mt-5">
+                {% if request.user.username == "plus1_fc" %}
+                <div>
+                    <button type="button" class="btn btn-outline-primary main_btn" id="shouhin_manual" data-bs-toggle="modal" data-bs-target="#manual_modal">
+                        <span style="font-size: 1.5em;"><i class="bi bi-cart-plus"></i></span>
+                        <span style="font-size: 1.2em; margin-left: 7px;">在庫確認 / キープ / カタログ発送</span>
+                    </button>
+                </div>
+                {% else %}
                 <div>
                     <button type="button" class="btn btn-outline-primary main_btn" id="shouhin_manual" data-bs-toggle="modal" data-bs-target="#manual_modal">
                         <span style="font-size: 1.5em;"><i class="bi bi-cart-plus"></i></span>
                         <span style="font-size: 1.2em; margin-left: 7px;">出荷依頼 / 在庫確認 / キープ / 資材・カタログ発送</span>
                     </button>
                 </div>
-                {% if request.user.username != "plus1_fc" %}
                 <div style="margin-left: 50px;">
                     <button type="button" class="btn btn-outline-success main_btn" id="shouhin_csv" data-bs-toggle="modal" data-bs-target="#csv_modal">
                         <span style="font-size: 1.5em;"><i class="bi bi-filetype-csv"></i></span>
