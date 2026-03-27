@@ -231,7 +231,7 @@
                                     {% endif %}                                                                        
                                 </td>
                                 <td style="vertical-align: middle; white-space: nowrap;">{{i.place}}</td>
-                                <td style="vertical-align: middle; text-align: center;">
+                                <td style="vertical-align: middle; text-align: center; white-space: nowrap;">
                                     {% if i.irai_status == 0 %}
                                         <form action="{% url 'zaiko:rireki_detail' i.pk %}" method="post">{% csrf_token %}
                                             <button type="submit" class="btn btn-success btn-sm">発送待ち</button>
