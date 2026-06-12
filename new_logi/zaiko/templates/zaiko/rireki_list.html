@@ -148,6 +148,13 @@
 
             <hr>
             <!-- 履歴一覧 -->
+            {% if request.user.username == "p1masao" %}
+            <div>
+                <a href="{% url 'zaiko:rireki_search_dl' %}">
+                    <button type="button" class="btn btn-outline-success btn-sm"><i class="bi bi-download"></i> 検索結果をダウンロード</button>
+                </a>
+            </div>
+            {% endif %}
             <div class="mt-3">
                 <div>
                     <table class="table table-bordered" style="font-size: 0.9em;">

@@ -12,6 +12,11 @@ from django.conf import settings
 import jpholiday
 from django.db.models import Max
 from django.utils import timezone
+import pandas as pd
+from io import BytesIO
+from django.http import HttpResponse
+from django_pandas.io import read_frame
+import openpyxl
 
 
 # 出荷作業依頼書_ダウンロード
@@ -44,6 +49,8 @@ def index(request):
         request.session["zaiko"]["items2"]=[]
     if "rireki_search" not in request.session["zaiko"]:
         request.session["zaiko"]["rireki_search"]={}
+    if "rireki_search_list" not in request.session["zaiko"]:
+        request.session["zaiko"]["rireki_search_list"]=[]
     if "now_page" not in request.session["zaiko"]:
         request.session["zaiko"]["now_page"]="在庫"
     
@@ -643,6 +650,7 @@ def rireki_index(request):
             fil["catalog_cus_mail"]=ses["sr_mail"]
 
         irai_list=Irai_list.objects.filter(**fil).order_by("irai_num").reverse()
+        request.session["zaiko"]["rireki_search_list"]=list(Irai_list.objects.filter(**fil).values_list("irai_num",flat=True))
 
     sr_hassou_type={"1":"通常便","2":"お急ぎ便","3":"当日出荷"}
     sr_naiyou_1={"0":"商品在庫発送","1":"キープ","2":"資材・カタログ発送","3":"入庫"}
@@ -688,6 +696,40 @@ def rireki_search(request):
     request.session["zaiko"]["rireki_search"]=form_data
     request.session["zaiko"]["page_num"]=1
     return redirect("zaiko:rireki_index")
+
+
+# 履歴一覧_DL
+def rireki_search_dl(request):
+    s_list=request.session["zaiko"]["rireki_search_list"]
+    if len(s_list)>0:
+        ins=Irai_list.objects.filter(irai_num__in=s_list)
+    else:
+        ins=Irai_list.objects.all()
+    ins2=Irai_detail.objects.all()
+    df=read_frame(ins)
+    df2=read_frame(ins2)
+    
+    df=pd.merge(df,df2,on="irai_num")
+    df["irai_day"] = pd.to_datetime(df["irai_day"], utc=True).dt.tz_localize(None).dt.date
+    df["irai_type"]=df["irai_type"].replace({0:"在庫出荷",1:"キープ",2:"カタログ発送",3:"入庫"})
+
+    df=df[["irai_day","irai_num","shozoku","tantou","irai_type","zaiko_kakouba","shouhin_num","shouhin_name","color","size","kazu"]]
+    df.columns=["依頼日","依頼No","所属","担当者","依頼内容","加工場 / 店舗","品番","品名","カラー","サイズ","数量"]
+
+    # Excelファイルをメモリ上に作成
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='入出庫履歴')
+
+    buffer.seek(0)
+
+    # HTTPレスポンスとしてExcelファイルを返す
+    response = HttpResponse(
+        buffer,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="search_result.xlsx"'
+    return response
 
 
 # ページネーション_前へ
