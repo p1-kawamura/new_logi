@@ -764,12 +764,15 @@
             for (var i of response.item_list){
                 if (response.ses_list.includes(i.hontai_num.toString())){
                     input="<span style='font-size:0.9em; color:red;'>追加済み</span>";
+                    mai="";
                 } else {
                     if (i.available > 0){
                         input="<input type='number' min='0' max='" + i.available + 
                         "' class='form-control' id='hontai_" + i.hontai_num + "' name='orders' style='text-align:right;'>";
+                        mai="枚";
                     } else {
                         input="";
+                        mai="";
                     }                    
                 }
                 var attention="";
@@ -777,7 +780,8 @@
                 str = str + "<tr>" +
                     "<td>" + i.color + "</td>" +
                     "<td>" + i.size + "</td>" +
-                    "<td>" + input + "</td>" +
+                    "<td><div style='display:flex; flex-wrap:nowrap; align-items:center;'><div>" + input + "</div>" +
+                    "<div style='margin-left:5px'>" + mai + "</div></div></td>" +
                     "<td style='text-align:right;'>" + i.available + "</td>" +
                     "<td>" + attention + "</td></tr>"
             }
